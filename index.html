@@ -1,259 +1,399 @@
 <!doctype html>
-<html lang="ru" data-theme="dark">
+<html lang="ru" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" id="metaThemeColor" content="#07090f">
-  <meta name="apple-mobile-web-app-title" content="TripLog">
-  <link rel="manifest" href="manifest.json">
-  <title>TripLog</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-  <style>
-    :root[data-theme="dark"]{--bg:#07090f;--surface:rgba(15,22,40,.88);--border:rgba(255,255,255,.08);--text:#e8eef8;--muted:#5a6a8a;--accent:#38bdf8;--accent2:#818cf8;--green:#34d399;--red:#f87171;--amber:#fbbf24;--shadow:0 8px 32px rgba(0,0,0,.5);--sheet:#0d1628}
-    :root[data-theme="light"]{--bg:#f0f4f8;--surface:rgba(255,255,255,.92);--border:rgba(0,0,0,.08);--text:#1a2236;--muted:#8899bb;--accent:#0284c7;--accent2:#6366f1;--green:#059669;--red:#dc2626;--amber:#d97706;--shadow:0 4px 20px rgba(0,0,0,.1);--sheet:#f8fafc}
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100dvh;transition:background .3s,color .3s;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
-    .app{max-width:420px;margin:0 auto;padding:16px 14px 120px}
-    /* TOPBAR */
-    .topbar{display:flex;align-items:center;gap:8px;margin-bottom:18px}
-    .logo{font-weight:900;font-size:18px;letter-spacing:-.5px;flex:1}
-    .logo span{color:var(--accent)}
-    .trip-chip{display:flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:6px 12px;cursor:pointer;font-size:11px;font-weight:700;color:var(--muted);max-width:120px}
-    .trip-chip-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
-    .icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s}
-    .icon-btn:active{transform:scale(.9)}
-    /* HERO */
-    .hero{background:var(--surface);border:1px solid var(--border);border-radius:28px;padding:24px;margin-bottom:14px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-    .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.12),transparent 70%);pointer-events:none}
-    .hero-trip{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:4px}
-    .hero-lbl{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
-    .hero-total{font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1;font-family:'Space Mono',monospace}
-    .hero-total .c{font-size:28px;opacity:.6}
-    .hero-geo{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-top:10px;display:flex;align-items:center;gap:5px}
-    .geo-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 6px var(--green);animation:blink 2s infinite}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-    /* STATS */
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-    .stat{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 10px;text-align:center;box-shadow:var(--shadow)}
-    .stat-i{font-size:20px;margin-bottom:4px}
-    .stat-v{font-size:15px;font-weight:700;color:var(--accent);font-family:'Space Mono',monospace}
-    .stat-l{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
-    /* CURRENCY */
-    .cur-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:10px 14px;margin-bottom:14px;box-shadow:var(--shadow)}
-    .cur-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
-    .cur-sel{flex:1;height:34px;border-radius:10px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);color:var(--accent);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:0 10px;outline:none;cursor:pointer}
-    .rate-b{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap}
-    .rate-b.spin{color:var(--amber);animation:blink 1s infinite}
-    .rate-b.ok{color:var(--green)}
-    .rate-b.err{color:var(--red)}
-    /* MIC */
-    .mic{width:100%;height:72px;border-radius:22px;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:900;font-size:15px;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.25)}
-    .mic:active{transform:scale(.97)}
-    .mic.rec{background:var(--red)!important;color:#fff!important;animation:pulse 1.2s infinite}
-    @keyframes pulse{0%,100%{box-shadow:0 4px 20px rgba(248,113,113,.4)}50%{box-shadow:0 4px 40px rgba(248,113,113,.8)}}
-    /* SEARCH */
-    .search-row{display:flex;gap:8px;margin-bottom:14px}
-    .sw{flex:1;position:relative}
-    .sw svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none}
-    .si{width:100%;height:44px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:0 14px 0 36px;outline:none;transition:border-color .2s}
-    .si:focus{border-color:var(--accent)}
-    .si::placeholder{color:var(--muted)}
-    .fsel{height:44px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:0 12px;outline:none;cursor:pointer}
-    /* CHARTS */
-    .charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-    .cc{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
-    .ct{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
-    .pie-w{display:flex;align-items:center;gap:12px}
-    .pie-leg{display:flex;flex-direction:column;gap:6px}
-    .li{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600}
-    .ld{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-    .lv{color:var(--muted);font-size:10px;font-family:'Space Mono',monospace;margin-left:auto}
-    .bar-w{display:flex;gap:8px;align-items:flex-end;height:80px}
-    .bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
-    .bv{font-size:9px;font-weight:700;color:var(--text);font-family:'Space Mono',monospace}
-    .bt{width:100%;background:var(--border);border-radius:8px;position:relative;overflow:hidden;flex:1;min-height:4px}
-    .bf{position:absolute;bottom:0;left:0;right:0;border-radius:8px;transition:height .5s cubic-bezier(.34,1.56,.64,1)}
-    .bl{font-size:9px;font-weight:700;color:var(--muted)}
-    /* LOG */
-    .sec-hdr{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;padding:0 4px;margin-bottom:10px}
-    .entry{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px;cursor:pointer;transition:border-color .2s,transform .15s;box-shadow:var(--shadow)}
-    .entry:active{transform:scale(.98);border-color:var(--accent)}
-    .ei{font-size:26px;flex-shrink:0}
-    .eb{flex:1;min-width:0}
-    .en{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .em{display:flex;justify-content:space-between;margin-top:3px}
-    .ec{font-size:10px;color:var(--muted);font-weight:600}
-    .et{font-size:10px;color:var(--muted);font-weight:600;font-family:'Space Mono',monospace}
-    .ea{font-family:'Space Mono',monospace;font-weight:700;font-size:15px;color:var(--accent);flex-shrink:0;text-align:right}
-    .eo{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace}
-    .del{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;font-size:16px;flex-shrink:0}
-    .del:active{color:var(--red)}
-    .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
-    .empty-i{font-size:40px;margin-bottom:10px;opacity:.5}
-    /* TOAST */
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--bg);font-weight:700;font-size:13px;padding:12px 22px;border-radius:100px;box-shadow:0 8px 32px rgba(0,0,0,.4);transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;z-index:9999;pointer-events:none}
-    .toast.show{transform:translateX(-50%) translateY(0)}
-    /* OVERLAY */
-    .ov{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
-    .ov.open{opacity:1;pointer-events:all}
-    .sh{width:100%;max-width:420px;background:var(--sheet);border-radius:28px 28px 0 0;padding-bottom:env(safe-area-inset-bottom,20px);transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.15,.64,1);max-height:92dvh;overflow-y:auto}
-    .ov.open .sh{transform:translateY(0)}
-    .handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:12px auto 0}
-    /* DETAIL MODAL */
-    .map-thumb{width:100%;height:180px;background:var(--surface);position:relative;overflow:hidden;margin-top:12px}
-    .map-none{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:13px;font-weight:600;gap:8px}
-    .mb{padding:20px 22px 10px}
-    .mbadge{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px}
-    .mtitle{font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px}
-    .mamount{font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--accent);margin-bottom:4px}
-    .morig{font-family:'Space Mono',monospace;font-size:13px;color:var(--muted);margin-bottom:18px}
-    .mg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-    .mc{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
-    .mcl{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
-    .mcv{font-size:13px;font-weight:700}
-    .mcoords{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-align:center;margin-bottom:14px}
-    .ma{display:flex;gap:10px}
-    .mbtn{flex:1;height:52px;border-radius:16px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:800;font-size:14px;transition:transform .2s;display:flex;align-items:center;justify-content:center;gap:8px}
-    .mbtn:active{transform:scale(.97)}
-    .mbtn-map{background:var(--accent);color:#fff;flex:2}
-    .mbtn-cls{background:var(--surface);border:1px solid var(--border);color:var(--text)}
-    .mbtn-del{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--red)}
-    /* PANELS */
-    .pb{padding:20px 20px 10px}
-    .pt{font-size:18px;font-weight:900;margin-bottom:4px}
-    .ps{font-size:12px;color:var(--muted);margin-bottom:20px}
-    .nf{display:flex;gap:8px;margin-bottom:20px}
-    .ni{flex:1;height:48px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:0 14px;outline:none}
-    .ni:focus{border-color:var(--accent)}
-    .ni::placeholder{color:var(--muted)}
-    .nc{height:48px;padding:0 18px;border-radius:14px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap}
-    .tl{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
-    .ti{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s}
-    .ti.act{border-color:var(--accent);background:rgba(56,189,248,.08)}
-    .tin{flex:1;min-width:0}
-    .tin-n{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .tin-m{font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;font-family:'Space Mono',monospace}
-    .tit{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--accent);flex-shrink:0}
-    .tdel{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;font-size:15px;flex-shrink:0}
-    .abadge{font-size:8px;font-weight:800;letter-spacing:1px;background:var(--accent);color:#fff;border-radius:100px;padding:2px 7px;text-transform:uppercase;margin-left:4px}
-    .esel{width:100%;height:44px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:0 14px;outline:none;margin-bottom:16px}
-    .eg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-    .eb2{height:64px;border-radius:18px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:transform .2s}
-    .eb2:active{transform:scale(.97);border-color:var(--accent)}
-    .eb2 span:first-child{font-size:24px}
-    .sbtn{width:100%;height:56px;border-radius:18px;border:none;background:var(--text);color:var(--bg);font-family:'DM Sans',sans-serif;font-weight:800;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
-    ::-webkit-scrollbar{width:4px}
-    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#020617">
+
+    <title>Trip Tracker PWA</title>
+
+    <script>
+        // Tailwind config: тёмная тема по классу .dark
+        tailwind = {
+            config: {
+                darkMode: 'class'
+            }
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { background: #020617; color: #f8fafc; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(148, 163, 184, 0.25); backdrop-filter: blur(12px); }
+        .recording { animation: pulse 1.5s infinite; background: #ef4444 !important; color: #fff !important; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @media screen and (display-mode: standalone) {
+            body { padding-top: env(safe-area-inset-top); }
+        }
+        html:not(.dark) body {
+            background: #e5e7eb;
+            color: #020617;
+        }
+        html:not(.dark) .glass {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(148, 163, 184, 0.4);
+        }
+    </style>
 </head>
-<body>
-<div class="app">
-  <div class="topbar">
-    <div class="logo">TRIP<span>.</span>LOG</div>
-    <div class="trip-chip" onclick="openTrips()">🗂 <span class="trip-chip-name" id="tripName">—</span></div>
-    <button class="icon-btn" onclick="openExport()" title="Экспорт">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-    </button>
-    <button class="icon-btn" id="themeBtn">
-      <svg id="themeIco" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
-    </button>
-  </div>
+<body class="p-4">
+    <div class="max-w-md mx-auto space-y-4 relative">
 
-  <div class="hero">
-    <div class="hero-trip" id="heroTrip">—</div>
-    <div class="hero-lbl">Общие расходы</div>
-    <div class="hero-total" id="heroTotal">0<span class="c">,00 €</span></div>
-    <div class="hero-geo"><div class="geo-dot"></div><span id="geoLbl">Ожидание GPS...</span></div>
-  </div>
-
-  <div class="stats">
-    <div class="stat"><div class="stat-i">⛽</div><div class="stat-v" id="sf">0€</div><div class="stat-l">Топливо</div></div>
-    <div class="stat"><div class="stat-i">🏨</div><div class="stat-v" id="sh">0€</div><div class="stat-l">Жильё</div></div>
-    <div class="stat"><div class="stat-i">🍕</div><div class="stat-v" id="sfd">0€</div><div class="stat-l">Питание</div></div>
-  </div>
-
-  <div class="cur-bar">
-    <span class="cur-lbl">Валюта</span>
-    <select class="cur-sel" id="curSel" onchange="onCurChange()">
-      <option value="EUR">🇪🇺 EUR — Евро</option>
-      <option value="TRY">🇹🇷 TRY — Лира</option>
-      <option value="THB">🇹🇭 THB — Бат</option>
-      <option value="USD">🇺🇸 USD — Доллар</option>
-      <option value="GBP">🇬🇧 GBP — Фунт</option>
-      <option value="GEL">🇬🇪 GEL — Лари</option>
-      <option value="AMD">🇦🇲 AMD — Драм</option>
-      <option value="AZN">🇦🇿 AZN — Манат</option>
-      <option value="RSD">🇷🇸 RSD — Динар</option>
-      <option value="HUF">🇭🇺 HUF — Форинт</option>
-      <option value="PLN">🇵🇱 PLN — Злотый</option>
-      <option value="CZK">🇨🇿 CZK — Крона</option>
-      <option value="RON">🇷🇴 RON — Лей</option>
-      <option value="BGN">🇧🇬 BGN — Лев</option>
-      <option value="UAH">🇺🇦 UAH — Гривна</option>
-    </select>
-    <span class="rate-b spin" id="rateB">...</span>
-  </div>
-
-  <button class="mic" id="micBtn"><span>🎤</span><span id="micLbl">ЗАПИСАТЬ ГОЛОСОМ</span></button>
-
-  <div class="search-row">
-    <div class="sw">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <input class="si" id="srch" type="search" placeholder="Поиск..." autocomplete="off">
-    </div>
-    <select class="fsel" id="fcat">
-      <option value="">Все</option>
-      <option value="fuel">⛽ Топливо</option>
-      <option value="hotel">🏨 Жильё</option>
-      <option value="food">🍕 Питание</option>
-    </select>
-  </div>
-
-  <div class="charts">
-    <div class="cc"><div class="ct">По категориям</div>
-      <div class="pie-w"><svg id="pieSvg" width="80" height="80" viewBox="0 0 80 80"></svg><div class="pie-leg" id="pieLeg"></div></div>
-    </div>
-    <div class="cc"><div class="ct">Суммы</div><div class="bar-w" id="barW"></div></div>
-  </div>
-
-  <div class="sec-hdr" id="logHdr">Журнал расходов</div>
-  <div id="log"></div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- DETAIL -->
-<div class="ov" id="ovDetail" onclick="if(event.target===this)closeDetail()">
-  <div class="sh" id="shDetail">
-    <div class="handle"></div>
-    <div class="map-thumb" id="mapThumb"></div>
-    <div class="mb">
-      <div class="mbadge" id="mBadge"></div>
-      <div class="mtitle" id="mTitle"></div>
-      <div class="mamount" id="mAmt"></div>
-      <div class="morig" id="mOrig"></div>
-      <div class="mg">
-        <div class="mc"><div class="mcl">📍 Место</div><div class="mcv" id="mCity"></div></div>
-        <div class="mc"><div class="mcl">📅 Дата</div><div class="mcv" id="mDate"></div></div>
-        <div class="mc"><div class="mcl">🕐 Время</div><div class="mcv" id="mTime"></div></div>
-        <div class="mc"><div class="mcl">🗂 Категория</div><div class="mcv" id="mCat"></div></div>
-      </div>
-      <div class="mcoords" id="mCoords"></div>
-      <div class="ma">
-        <button class="mbtn mbtn-cls" onclick="closeDetail()">Закрыть</button>
-        <button class="mbtn mbtn-map" id="mMapBtn" onclick="goMap()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-          Google Maps
+        <!-- Переключатель темы -->
+        <button id="themeToggle" class="absolute -top-1 right-0 p-3 glass rounded-full flex items-center justify-center active:scale-95 transition">
+            <i id="themeIcon" data-lucide="sun"></i>
         </button>
-        <button class="mbtn mbtn-del" onclick="delFromDetail()">🗑</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- TRIPS -->
-<div class="ov" id="ovTrips" onclick="if(event.
+        <!-- Итоговая сумма + гео -->
+        <div class="glass rounded-[32px] p-6 text-center shadow-2xl mt-6">
+            <div id="total" class="text-5xl font-black mb-1">0,00 €</div>
+            <div id="geo" class="text-[10px] text-cyan-400 font-bold tracking-widest uppercase italic">📍 Ожидание GPS...</div>
+        </div>
+
+        <!-- Кнопка записи -->
+        <button id="micBtn" class="w-full h-24 bg-white text-black rounded-3xl font-black text-xl flex items-center justify-center gap-3 active:scale-95 transition-all dark:bg-slate-100 dark:text-slate-900">
+            <i data-lucide="mic"></i> ЗАПИСАТЬ ГОЛОСОМ
+        </button>
+
+        <!-- Фильтры и поиск -->
+        <div class="glass rounded-3xl p-4 space-y-3">
+            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Фильтры и поиск</h3>
+            <div class="flex gap-2">
+                <input id="searchInput" type="text" placeholder="Поиск по названию (например, отель, заправка)..."
+                       class="flex-1 rounded-2xl px-3 py-2 text-sm bg-slate-900/40 border border-slate-700/60 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-slate-900/40 dark:text-slate-100">
+            </div>
+            <div class="flex gap-2 text-xs">
+                <button data-cat="all" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-800 text-slate-100 font-bold active:scale-95 transition border border-slate-700">Все</button>
+                <button data-cat="fuel" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold active:scale-95 transition border border-slate-800">Топливо</button>
+                <button data-cat="hotel" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold active:scale-95 transition border border-slate-800">Жильё</button>
+                <button data-cat="food" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold active:scale-95 transition border border-slate-800">Питание</button>
+            </div>
+        </div>
+
+        <!-- Диаграммы -->
+        <div class="space-y-3">
+            <h3 class="text-[10px] font-bold text-slate-500 uppercase px-2 tracking-widest">Аналитика расходов</h3>
+            <div class="glass p-4 rounded-3xl">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Круговая диаграмма</span>
+                    <span class="text-[10px] text-slate-500">По категориям</span>
+                </div>
+                <canvas id="pieChart" height="180"></canvas>
+            </div>
+            <div class="glass p-4 rounded-3xl">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Столбчатая диаграмма</span>
+                    <span class="text-[10px] text-slate-500">Суммы по категориям</span>
+                </div>
+                <canvas id="barChart" height="180"></canvas>
+            </div>
+        </div>
+
+        <!-- Журнал -->
+        <div class="space-y-3">
+            <h3 class="text-[10px] font-bold text-slate-500 uppercase px-2 tracking-widest">Детальный журнал</h3>
+            <div id="history" class="space-y-3 pb-10"></div>
+        </div>
+    </div>
+
+<script>
+    // ------------------ ДАННЫЕ ---------------- JSON.parse(localStorage.getItem('trip_v7')) || [];
+    let curLoc = { city: "Трасса", lat: null, lon: null };
+
+    let currentFilter = {
+        cat: 'all',
+        search: ''
+    };
+
+    // ------------------ GPS ------------------
+    function initGps() {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.watchPosition(async (p) => {
+            curLoc.lat = p.coords.latitude;
+            curLoc.lon = p.coords.longitude;
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${curLoc.lat}&lon=${curLoc.lon}&accept-language=ru`);
+                const d = await res.json();
+                curLoc.city = d.address.city || d.address.town || d.address.village || "Трасса";
+                document.getElementById('geo').innerText = "📍 " + curLoc.city.toUpperCase();
+            } catch (e) {
+                document.getElementById('geo').innerText = "📍 В ПУТИ";
+            }
+        }, (err) => {
+            console.error(err);
+            document.getElementById('geo').innerText = "📍 ОШИБКА GPS";
+        }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+    }
+
+    // ------------------ ТЕМЫ ------------------
+    function applyTheme(t) {
+        document.documentElement.classList.toggle('dark', t === 'dark');
+        localStorage.setItem('theme', t);
+        const icon = document.getElementById('themeIcon');
+        icon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
+        lucide.createIcons();
+    }
+
+    let theme = localStorage.getItem('theme') || 'dark';
+    applyTheme(theme);
+
+    document.getElementById('themeToggle').onclick = () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        applyTheme(theme);
+    };
+
+    // ------------------ ВАЛЮТЫ ------------------
+    let fxRates = JSON.parse(localStorage.getItem('fx_rates') || 'null');
+
+    async function loadRates() {
+        const now = Date.now();
+        if (fxRates && fxRates.timestamp && (now - fxRates.timestamp < 60 * 60 * 1000)) {
+            return;
+        }
+        try {
+            const res = await fetch('https://api.exchangerate.host/latest?base=EUR&symbols=EUR,TRY,USD,GBP,PLN,CZK,HUF,RON,GEL');
+            const data = await res.json();
+            fxRates = {
+                rates: data.rates || {},
+                timestamp: now
+            };
+            localStorage.setItem('fx_rates', JSON.stringify(fxRates));
+        } catch (e) {
+            console.error('FX error', e);
+        }
+    }
+
+    function detectCurrency(text) {
+        // по умолчанию евро
+        if (text.includes('евро') || text.includes('eur') || text.includes('€')) return 'EUR';
+        if (text.includes('лир') || text.includes('лиры') || text.includes('лира') || text.includes('турец')) return 'TRY';
+        if (text.includes('доллар')) return 'USD';
+        if (text.includes('фунт')) return 'GBP';
+        if (text.includes('злот')) return 'PLN';
+        if (text.includes('крон')) return 'CZK';
+        if (text.includes('форинт')) return 'HUF';
+        if (text.includes('лей') || text.includes('леев') || text.includes('лея')) return 'RON';
+        if (text.includes('лари')) return 'GEL';
+        return 'EUR';
+    }
+
+    async function convertToEur(amount, currency) {
+        if (!amount || isNaN(amount)) return 0;
+        if (currency === 'EUR') return amount;
+        await loadRates();
+        if (!fxRates || !fxRates.rates || !fxRates.rates[currency]) {
+            // если нет курса — считаем как евро
+            return amount;
+        }
+        const rate = fxRates.rates[currency]; // 1 EUR = rate CURRENCY
+        return amount / rate;
+    }
+
+    // ------------------ ФИЛЬТРЫ ------------------
+    function getFilteredLog() {
+        return log.filter(item => {
+            if (currentFilter.cat !== 'all' && item.cat !== currentFilter.cat) return false;
+            if (currentFilter.search) {
+                const s = currentFilter.search.toLowerCase();
+                if (!item.name.toLowerCase().includes(s) && !item.city.toLowerCase().includes(s)) return false;
+            }
+            return true;
+        });
+    }
+
+    // ------------------ ДИАГРАММЫ ------------------
+    let pieChart, barChart;
+
+    function updateCharts() {
+        const filtered = getFilteredLog();
+        const sums = { fuel: 0, hotel: 0, food: 0 };
+        filtered.forEach(i => {
+            if (!sums[i.cat] && sums[i.cat] !== 0) return;
+            sums[i.cat] += i.eur;
+        });
+
+        const labels = ["Топливо", "Жильё", "Питание"];
+        const data = [sums.fuel, sums.hotel, sums.food];
+
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        const barCtx = document.getElementById('barChart').getContext('2d');
+
+        if (!pieChart) {
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels,
+                    datasets: [{
+                        data,
+                        backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"]
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#9ca3af',
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            pieChart.data.datasets[0].data = data;
+            pieChart.update();
+        }
+
+        if (!barChart) {
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: "€",
+                        data,
+                        backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"]
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            ticks: { color: '#9ca3af', font: { size: 11 } },
+                            grid: { display: false }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#9ca3af', font: { size: 11 } },
+                            grid: { color: 'rgba(148,163,184,0.2)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#9ca3af',
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            barChart.data.datasets[0].data = data;
+            barChart.update();
+        }
+    }
+
+    // ------------------ РЕНДЕР ------------------
+    function render() {
+        const h = document.getElementById('history');
+        const t = document.getElementById('total');
+        let sum = 0;
+
+        const items = getFilteredLog();
+
+        h.innerHTML = items.map((item) => {
+            sum += item.eur;
+            const hasCoords = item.lat != null && item.lon != null;
+            const mapUrl = `https://www.google.com/maps?q=${item.lat},${item.lon}`;
+            const icon = item.cat === 'fuel' ? '⛽' : item.cat === 'hotel' ? '🏨' : '🍕';
+            return `
+            <div ${hasCoords ? `onclick="window.open('${mapUrl}', '_blank')"` : ''} class="glass p-4 rounded-2xl flex items-center gap-4 active:bg-slate-800/70 transition-colors cursor-pointer">
+                <div class="text-2xl">${icon}</div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <span class="font-bold text-sm">${item.name}</span>
+                        <span class="text-cyan-400 font-mono font-bold">${item.eur.toFixed(2)}€</span>
+                    </div>
+                    <div class="flex justify-between text-[9px] text-slate-500 mt-1 font-bold">
+                        <span>${item.city}</span>
+                        <span>${item.date} | ${item.time}</span>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+        t.innerText = sum.toFixed(2).replace('.', ',') + " €";
+        updateCharts();
+        lucide.createIcons();
+    }
+
+    // ------------------ РЕЧЬ ------------------
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let rec = null;
+    if (SpeechRec) {
+        rec = new SpeechRec();
+        rec.lang = 'ru-RU';
+        document.getElementById('micBtn').onclick = () => rec.start();
+        rec.onstart = () => document.getElementById('micBtn').classList.add('recording');
+        rec.onend = () => document.getElementById('micBtn').classList.remove('recording');
+
+        rec.onresult = async (e) => {
+            const text = e.results[0][0].transcript.toLowerCase();
+            const numMatch = text.replace(',', '.').match(/(\d+[.,]?\d*)/);
+            if (!numMatch) return;
+            const rawAmount = parseFloat(numMatch[1]);
+            if (!rawAmount) return;
+
+            // Категория
+            let cat = 'food'; let name = "Питание";
+            if (text.includes('отель') || text.includes('ночь') || text.includes('гостиниц')) { cat = 'hotel'; name = "Жильё"; }
+            if (text.includes('заправка') || text.includes('бензин') || text.includes('дизель') || text.includes('топливо')) { cat = 'fuel'; name = "Топливо"; }
+
+            // Валюта
+            const currency = detectCurrency(text);
+            const eurAmount = await convertToEur(rawAmount, currency);
+
+            const now = new Date();
+            log.unshift({
+                name,
+                eur: eurAmount,
+                cat,
+                city: curLoc.city,
+                lat: curLoc.lat,
+                lon: curLoc.lon,
+                time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                date: now.toLocaleDateString('ru-RU', {day: 'numeric', month: 'short'})
+            });
+            localStorage.setItem('trip_v7', JSON.stringify(log));
+            render();
+        };
+    } else {
+        document.getElementById('micBtn').disabled = true;
+        document.getElementById('micBtn').innerText = 'Речь не поддерживается';
+    }
+
+    // ------------------ СЛУШАТЕЛИ ФИЛЬТРОВ ------------------
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        currentFilter.search = e.target.value.trim();
+        render();
+    });
+
+    document.querySelectorAll('.catBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cat = btn.getAttribute('data-cat');
+            currentFilter.cat = cat;
+            document.querySelectorAll('.catBtn').forEach(b => {
+                if (b === btn) {
+                    b.classList.remove('bg-slate-900', 'text-slate-400');
+                    b.classList.add('bg-slate-800', 'text-slate-100');
+                } else {
+                    b.classList.add('bg-slate-900', 'text-slate-400');
+                    b.classList.remove('bg-slate-800', 'text-slate-100');
+                }
+            });
+            render();
+        });
+    });
+
+    // ------------------ СТАРТ ------------------
+    initGps();
+    loadRates();
+    render();
+</script>
+</body>
+</html>
