@@ -1,19 +1,22 @@
 {
-  "name": "TripLog — Трекер расходов",
+  "name": "TripLog",
   "short_name": "TripLog",
-  "description": "Голосовой трекер расходов в поездке с конвертером валют",
-  "start_url": "/",
-  "scope": "/",
+  "description": "Трекер расходов в путешествии с голосовым вводом",
+  "start_url": ".",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#07090f",
   "theme_color": "#07090f",
+  "orientation": "portrait-primary",
+  "lang": "ru",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/854/854878.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%2307090f'/%3E%3Ctext x='256' y='330' font-size='280' text-anchor='middle' font-family='system-ui'%3E🗺️%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["travel", "finance", "utilities"],
+  "screenshots": [],
+  "prefer_related_applications": false
 }
