@@ -5,269 +5,937 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#07090f">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" id="metaThemeColor" content="#07090f">
+  <meta name="apple-mobile-web-app-title" content="TripLog">
+  <meta name="application-name" content="TripLog">
   <link rel="manifest" href="manifest.json">
-  <title>TripLog Ultimate</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;700;900&display=swap" rel="stylesheet">
+  <title>TripLog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
 
   <style>
-    :root {
+    :root[data-theme="dark"] {
       --bg:#07090f; --bg2:#0f1525; --surface:rgba(15,22,40,0.88);
       --border:rgba(255,255,255,0.08); --text:#e8eef8; --muted:#5a6a8a;
-      --accent:#38bdf8; --green:#34d399; --red:#f87171; --sheet-bg:#0d1628;
+      --accent:#38bdf8; --accent2:#818cf8; --green:#34d399; --red:#f87171;
+      --amber:#fbbf24; --card-shadow:0 8px 32px rgba(0,0,0,0.5);
+      --sheet-bg:#0d1628;
     }
-    * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-    body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; padding-bottom:120px; }
-    .mono { font-family:'Space Mono',monospace; }
-    .app { max-width:420px; margin:0 auto; padding:16px; }
+    :root[data-theme="light"] {
+      --bg:#f0f4f8; --bg2:#ffffff; --surface:rgba(255,255,255,0.92);
+      --border:rgba(0,0,0,0.08); --text:#1a2236; --muted:#8899bb;
+      --accent:#0284c7; --accent2:#6366f1; --green:#059669; --red:#dc2626;
+      --amber:#d97706; --card-shadow:0 4px 20px rgba(0,0,0,0.1);
+      --sheet-bg:#f8fafc;
+    }
 
-    /* HEADER & TRIP SELECTOR */
-    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
-    .trip-badge { background:var(--surface); border:1px solid var(--border); padding:8px 16px; border-radius:100px; display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:700; }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    body{
+      background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;
+      min-height:100dvh;transition:background .35s,color .35s;
+      padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
+    }
+    .mono{font-family:'Space Mono',monospace}
+    .app{max-width:420px;margin:0 auto;padding:16px 14px 120px}
+
+    /* TOP BAR */
+    .topbar{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+    .logo{font-weight:900;font-size:18px;letter-spacing:-.5px;flex:1}
+    .logo span{color:var(--accent)}
+    .trip-chip{display:flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:6px 12px;cursor:pointer;font-size:11px;font-weight:700;color:var(--muted);transition:border-color .2s;max-width:120px}
+    .trip-chip:active{border-color:var(--accent)}
+    .trip-chip-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+    .icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;backdrop-filter:blur(10px);flex-shrink:0}
+    .icon-btn:active{transform:scale(.9)}
 
     /* HERO */
-    .hero { background:var(--surface); border:1px solid var(--border); border-radius:28px; padding:24px; margin-bottom:14px; box-shadow:0 8px 32px rgba(0,0,0,0.5); }
-    .hero-val { font-size:52px; font-weight:900; letter-spacing:-2px; line-height:1; }
-    .hero-val span { font-size:24px; opacity:0.6; }
+    .hero{background:var(--surface);border:1px solid var(--border);backdrop-filter:blur(16px);border-radius:28px;padding:24px;margin-bottom:14px;box-shadow:var(--card-shadow);position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.12) 0%,transparent 70%);pointer-events:none}
+    .hero-trip-name{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:4px}
+    .hero-label{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+    .hero-total{font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1}
+    .hero-total .cents{font-size:28px;opacity:.6}
+    .hero-geo{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-top:10px;display:flex;align-items:center;gap:5px}
+    .geo-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 6px var(--green);animation:blink 2s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-    /* STATS GRID */
-    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
-    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:12px; text-align:center; }
-    .stat-card b { display:block; color:var(--accent); font-family:'Space Mono'; font-size:14px; margin-top:5px; }
+    /* STATS */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+    .stat-card{background:var(--surface);border:1px solid var(--border);backdrop-filter:blur(10px);border-radius:18px;padding:14px 10px;text-align:center;box-shadow:var(--card-shadow)}
+    .stat-icon{font-size:20px;margin-bottom:4px}
+    .stat-val{font-size:15px;font-weight:700;color:var(--accent);font-family:'Space Mono',monospace}
+    .stat-lbl{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
 
-    /* MAIN BUTTONS */
-    .mic-btn { width:100%; height:72px; border-radius:22px; background:#fff; color:#000; border:none; font-weight:900; font-size:15px; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px; }
-    .mic-btn.active { background:var(--red); color:#fff; animation:pulse 1s infinite; }
-    @keyframes pulse { 50% { opacity:0.7; } }
+    /* CURRENCY PILL */
+    .currency-bar{
+      display:flex;align-items:center;gap:8px;
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:18px;padding:10px 14px;margin-bottom:14px;
+      backdrop-filter:blur(10px);box-shadow:var(--card-shadow);
+    }
+    .currency-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+    .currency-select{
+      flex:1;height:34px;border-radius:10px;
+      background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);
+      color:var(--accent);font-family:'DM Sans',sans-serif;
+      font-size:13px;font-weight:700;padding:0 10px;
+      outline:none;cursor:pointer;
+    }
+    .rate-badge{
+      font-family:'Space Mono',monospace;font-size:10px;font-weight:700;
+      color:var(--muted);white-space:nowrap;
+    }
+    .rate-badge.loading{color:var(--amber);animation:blink 1s infinite}
+    .rate-badge.ok{color:var(--green)}
+    .rate-badge.err{color:var(--red)}
+
+    /* MIC */
+    .mic-btn{width:100%;height:72px;border-radius:22px;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:900;font-size:15px;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+    .mic-btn:active{transform:scale(.97)}
+    .mic-btn.recording{background:var(--red)!important;color:#fff!important;animation:pulse-btn 1.2s infinite}
+    @keyframes pulse-btn{0%,100%{box-shadow:0 4px 20px rgba(248,113,113,.4)}50%{box-shadow:0 4px 40px rgba(248,113,113,.8)}}
+
+    /* SEARCH */
+    .search-row{display:flex;gap:8px;margin-bottom:14px}
+    .search-wrap{flex:1;position:relative}
+    .search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none}
+    .search-input{width:100%;height:44px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:0 14px 0 36px;outline:none;backdrop-filter:blur(10px);transition:border-color .2s}
+    .search-input:focus{border-color:var(--accent)}
+    .search-input::placeholder{color:var(--muted)}
+    .filter-select{height:44px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:0 12px;outline:none;cursor:pointer;backdrop-filter:blur(10px)}
 
     /* CHARTS */
-    .charts { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
-    .chart-box { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:15px; height:120px; }
-    .chart-label { font-size:9px; font-weight:800; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
-    .bar-cont { display:flex; align-items:flex-end; gap:4px; height:60px; }
-    .bar { background:var(--accent); flex:1; border-radius:3px; transition:height 0.4s; }
+    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;box-shadow:var(--card-shadow);backdrop-filter:blur(10px)}
+    .chart-title{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+    .pie-wrap{display:flex;align-items:center;gap:12px}
+    .pie-svg{flex-shrink:0}
+    .pie-legend{display:flex;flex-direction:column;gap:6px}
+    .legend-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600}
+    .legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .legend-val{color:var(--muted);font-size:10px;font-family:'Space Mono',monospace;margin-left:auto}
+    .bar-wrap{display:flex;gap:8px;align-items:flex-end;height:80px}
+    .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+    .bar-val{font-size:9px;font-weight:700;color:var(--text);font-family:'Space Mono',monospace}
+    .bar-track{width:100%;background:var(--border);border-radius:8px;position:relative;overflow:hidden;flex:1;min-height:4px}
+    .bar-fill{position:absolute;bottom:0;left:0;right:0;border-radius:8px;transition:height .6s cubic-bezier(.34,1.56,.64,1)}
+    .bar-lbl{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.5px}
 
-    /* LIST */
-    .entry { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:14px; display:flex; align-items:center; gap:12px; margin-bottom:8px; }
-    .entry-info { flex:1; min-width:0; }
-    .entry-info b { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .entry-amt { font-family:'Space Mono'; font-weight:700; color:var(--accent); }
+    /* HISTORY */
+    .section-hdr{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;padding:0 4px;margin-bottom:10px}
+    .entry{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px;cursor:pointer;transition:border-color .2s,transform .15s;backdrop-filter:blur(10px);box-shadow:var(--card-shadow)}
+    .entry:active{transform:scale(.98);border-color:var(--accent)}
+    .entry-icon{font-size:26px;flex-shrink:0}
+    .entry-body{flex:1;min-width:0}
+    .entry-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .entry-meta{display:flex;justify-content:space-between;margin-top:3px}
+    .entry-city{font-size:10px;color:var(--muted);font-weight:600}
+    .entry-time{font-size:10px;color:var(--muted);font-weight:600;font-family:'Space Mono',monospace}
+    .entry-amount{font-family:'Space Mono',monospace;font-weight:700;font-size:15px;color:var(--accent);flex-shrink:0;text-align:right}
+    .entry-orig{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:1px}
+    .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:8px;transition:color .2s;font-size:16px;flex-shrink:0}
+    .del-btn:active{color:var(--red)}
+    .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;font-weight:500}
+    .empty-icon{font-size:40px;margin-bottom:10px;opacity:.5}
 
-    /* SHEETS (MODALS) */
-    .sheet-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); display:none; align-items:flex-end; z-index:1000; }
-    .sheet { width:100%; background:var(--sheet-bg); border-radius:30px 30px 0 0; padding:24px; max-height:90vh; overflow-y:auto; transform:translateY(100%); transition:0.3s; }
-    .sheet-overlay.active { display:flex; }
-    .sheet-overlay.active .sheet { transform:translateY(0); }
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--bg);font-weight:700;font-size:13px;padding:12px 22px;border-radius:100px;box-shadow:0 8px 32px rgba(0,0,0,.4);transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;z-index:9999;pointer-events:none}
+    .toast.show{transform:translateX(-50%) translateY(0)}
 
-    /* EXPORT BUTTONS GRID */
-    .export-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; }
-    .exp-btn { background:var(--surface); border:1px solid var(--border); border-radius:15px; padding:15px; text-align:center; cursor:pointer; }
-    .exp-btn img, .exp-btn span { display:block; font-size:24px; margin-bottom:8px; }
-    .exp-btn label { font-size:11px; font-weight:700; }
+    /* OVERLAY / SHEET */
+    .overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+    .overlay.open{opacity:1;pointer-events:all}
+    .sheet{width:100%;max-width:420px;background:var(--sheet-bg);border-radius:28px 28px 0 0;padding-bottom:env(safe-area-inset-bottom,20px);transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.15,.64,1);overflow:hidden;max-height:92dvh;overflow-y:auto}
+    .overlay.open .sheet{transform:translateY(0)}
+    .sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:12px auto 0}
 
-    .share-main { width:100%; padding:18px; border-radius:18px; background:var(--text); color:var(--bg); border:none; font-weight:900; margin-top:15px; }
+    /* DETAIL MODAL */
+    .modal-map-thumb{width:100%;height:180px;background:var(--surface);position:relative;overflow:hidden;margin-top:12px}
+    .modal-map-nocoords{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:13px;font-weight:600;gap:8px}
+    .modal-body{padding:20px 22px 10px}
+    .modal-cat-badge{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px}
+    .modal-title{font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px}
+    .modal-amount{font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--accent);margin-bottom:4px}
+    .modal-amount-orig{font-family:'Space Mono',monospace;font-size:14px;color:var(--muted);margin-bottom:18px}
+    .modal-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+    .modal-info-cell{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+    .modal-info-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+    .modal-info-val{font-size:13px;font-weight:700}
+    .modal-coords{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-align:center;margin-bottom:14px}
+    .modal-actions{display:flex;gap:10px}
+    .modal-btn{flex:1;height:52px;border-radius:16px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:800;font-size:14px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+    .modal-btn:active{transform:scale(.97)}
+    .modal-btn-map{background:var(--accent);color:#fff;flex:2}
+    .modal-btn-close{background:var(--surface);border:1px solid var(--border);color:var(--text)}
+    .modal-btn-del{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--red)}
+
+    /* TRIPS / EXPORT PANELS */
+    .panel-body{padding:20px 20px 10px}
+    .panel-title{font-size:18px;font-weight:900;margin-bottom:4px}
+    .panel-sub{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:20px}
+    .new-trip-form{display:flex;gap:8px;margin-bottom:20px}
+    .trip-name-input{flex:1;height:48px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:0 14px;outline:none;transition:border-color .2s}
+    .trip-name-input:focus{border-color:var(--accent)}
+    .trip-name-input::placeholder{color:var(--muted)}
+    .btn-create{height:48px;padding:0 18px;border-radius:14px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap;transition:opacity .2s}
+    .btn-create:active{opacity:.8}
+    .trips-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+    .trip-item{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s}
+    .trip-item:active{border-color:var(--accent)}
+    .trip-item.active-trip{border-color:var(--accent);background:rgba(56,189,248,.08)}
+    .trip-item-info{flex:1;min-width:0}
+    .trip-item-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .trip-item-meta{font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;font-family:'Space Mono',monospace}
+    .trip-item-total{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--accent);flex-shrink:0}
+    .trip-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;font-size:15px;flex-shrink:0}
+    .trip-del-btn:active{color:var(--red)}
+    .active-badge{font-size:8px;font-weight:800;letter-spacing:1px;background:var(--accent);color:#fff;border-radius:100px;padding:2px 7px;text-transform:uppercase;margin-left:4px}
+    .export-trip-sel{width:100%;height:44px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:0 14px;outline:none;margin-bottom:16px}
+    .export-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    .export-btn{height:64px;border-radius:18px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .2s}
+    .export-btn:active{transform:scale(.97);border-color:var(--accent)}
+    .export-btn-icon{font-size:24px}
+    .share-btn{width:100%;height:56px;border-radius:18px;border:none;background:var(--text);color:var(--bg);font-family:'DM Sans',sans-serif;font-weight:800;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .2s}
+    .share-btn:active{opacity:.8}
+
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
   </style>
 </head>
 <body>
-
 <div class="app">
-  <div class="header">
-    <div class="trip-badge" onclick="showTripManager()">
-      <span>📂</span> <span id="currentTripName">Путь к мечте</span>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="logo">TRIP<span>.</span>LOG</div>
+    <div class="trip-chip" id="tripChip" onclick="openTripsPanel()">
+      <span>🗂</span><span class="trip-chip-name" id="tripChipName">Поездка</span>
     </div>
-    <select id="currencyMain" class="trip-badge" style="background:none; border-color:transparent">
-      <option value="EUR">EUR (€)</option>
-      <option value="TRY">TRY (₺)</option>
-      <option value="RSD">RSD (дин)</option>
+    <button class="icon-btn" onclick="openExportPanel()" title="Экспорт">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+    </button>
+    <button class="icon-btn" id="themeBtn" title="Тема">
+      <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+    </button>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-trip-name" id="heroTripName">—</div>
+    <div class="hero-label">Общие расходы</div>
+    <div class="hero-total mono" id="heroTotal">0<span class="cents">,00 €</span></div>
+    <div class="hero-geo"><div class="geo-dot"></div><span id="geoLabel">Ожидание GPS...</span></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-icon">⛽</div><div class="stat-val mono" id="s-fuel">0€</div><div class="stat-lbl">Топливо</div></div>
+    <div class="stat-card"><div class="stat-icon">🏨</div><div class="stat-val mono" id="s-hotel">0€</div><div class="stat-lbl">Жильё</div></div>
+    <div class="stat-card"><div class="stat-icon">🍕</div><div class="stat-val mono" id="s-food">0€</div><div class="stat-lbl">Питание</div></div>
+  </div>
+
+  <!-- CURRENCY BAR -->
+  <div class="currency-bar">
+    <span class="currency-label">Валюта</span>
+    <select class="currency-select" id="currencySelect" onchange="onCurrencyChange()">
+      <option value="EUR">🇪🇺 EUR — Евро</option>
+      <option value="TRY">🇹🇷 TRY — Лира</option>
+      <option value="THB">🇹🇭 THB — Бат</option>
+      <option value="USD">🇺🇸 USD — Доллар</option>
+      <option value="GBP">🇬🇧 GBP — Фунт</option>
+      <option value="GEL">🇬🇪 GEL — Лари</option>
+      <option value="AMD">🇦🇲 AMD — Драм</option>
+      <option value="AZN">🇦🇿 AZN — Манат</option>
+      <option value="RSD">🇷🇸 RSD — Динар</option>
+      <option value="HUF">🇭🇺 HUF — Форинт</option>
+      <option value="PLN">🇵🇱 PLN — Злотый</option>
+      <option value="CZK">🇨🇿 CZK — Крона</option>
+      <option value="RON">🇷🇴 RON — Лей</option>
+      <option value="BGN">🇧🇬 BGN — Лев</option>
+      <option value="HRK">🇭🇷 HRK — Куна</option>
+      <option value="MKD">🇲🇰 MKD — Денар</option>
+      <option value="ALL">🇦🇱 ALL — Лек</option>
+      <option value="BAM">🇧🇦 BAM — Марка</option>
+      <option value="MDL">🇲🇩 MDL — Лей</option>
+      <option value="UAH">🇺🇦 UAH — Гривна</option>
+    </select>
+    <span class="rate-badge loading" id="rateBadge">...</span>
+  </div>
+
+  <!-- MIC -->
+  <button class="mic-btn" id="micBtn">
+    <span>🎤</span><span id="micLabel">ЗАПИСАТЬ ГОЛОСОМ</span>
+  </button>
+
+  <!-- SEARCH -->
+  <div class="search-row">
+    <div class="search-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input class="search-input" id="searchInput" type="search" placeholder="Поиск..." autocomplete="off">
+    </div>
+    <select class="filter-select" id="filterCat">
+      <option value="">Все</option>
+      <option value="fuel">⛽ Топливо</option>
+      <option value="hotel">🏨 Жильё</option>
+      <option value="food">🍕 Питание</option>
     </select>
   </div>
 
-  <div class="hero">
-    <div class="hero-val mono" id="totalEur">0<span>,00 €</span></div>
-    <div id="gpsStatus" style="font-size:10px; margin-top:10px; color:var(--accent)">📍 Поиск GPS...</div>
-  </div>
-
-  <div class="stats-grid">
-    <div class="stat-card">⛽<b id="s-fuel">0€</b></div>
-    <div class="stat-card">🏨<b id="s-hotel">0€</b></div>
-    <div class="stat-card">🍕<b id="s-food">0€</b></div>
-  </div>
-
-  <button class="mic-btn" id="micBtn">🎤 ЗАПИСАТЬ ГОЛОСОМ</button>
-  
-  <div class="header" style="margin-top:20px">
-    <input type="text" id="search" placeholder="Поиск..." style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px; color:#fff; flex:1; margin-right:10px">
-    <button class="trip-badge" onclick="showExportMenu()">📤 Поделиться</button>
-  </div>
-
-  <div class="charts">
-    <div class="chart-box">
-      <div class="chart-label">Категории</div>
-      <svg id="pie" viewBox="0 0 40 40" style="width:60px; height:60px; transform:rotate(-90deg)"></svg>
+  <!-- CHARTS -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">По категориям</div>
+      <div class="pie-wrap">
+        <svg class="pie-svg" id="pieSvg" width="80" height="80" viewBox="0 0 80 80"></svg>
+        <div class="pie-legend" id="pieLegend"></div>
+      </div>
     </div>
-    <div class="chart-box">
-      <div class="chart-label">Суммы (EUR)</div>
-      <div class="bar-cont" id="barCont"></div>
+    <div class="chart-card">
+      <div class="chart-title">Суммы</div>
+      <div class="bar-wrap" id="barWrap"></div>
     </div>
   </div>
 
+  <div class="section-hdr" id="histHdr">Журнал расходов</div>
   <div id="history"></div>
 </div>
 
-<div class="sheet-overlay" id="exportOverlay" onclick="if(event.target===this)closeModals()">
-  <div class="sheet">
-    <div style="text-align:center; margin-bottom:20px">
-      <h2 style="font-weight:900">📥 Экспорт и обмен</h2>
-      <p style="font-size:12px; color:var(--muted)">Выберите формат данных для поездки</p>
+<div class="toast" id="toast"></div>
+
+<!-- DETAIL MODAL -->
+<div class="overlay" id="modalOverlay" onclick="if(event.target===this)closeModalDirect()">
+  <div class="sheet" id="modalSheet">
+    <div class="sheet-handle"></div>
+    <div class="modal-map-thumb" id="modalMapThumb"></div>
+    <div class="modal-body">
+      <div class="modal-cat-badge" id="modalBadge"></div>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-amount" id="modalAmount"></div>
+      <div class="modal-amount-orig" id="modalAmountOrig"></div>
+      <div class="modal-info-grid">
+        <div class="modal-info-cell"><div class="modal-info-lbl">📍 Место</div><div class="modal-info-val" id="modalCity"></div></div>
+        <div class="modal-info-cell"><div class="modal-info-lbl">📅 Дата</div><div class="modal-info-val" id="modalDate"></div></div>
+        <div class="modal-info-cell"><div class="modal-info-lbl">🕐 Время</div><div class="modal-info-val" id="modalTime"></div></div>
+        <div class="modal-info-cell"><div class="modal-info-lbl">🗂 Категория</div><div class="modal-info-val" id="modalCatName"></div></div>
+      </div>
+      <div class="modal-coords" id="modalCoords"></div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-close" onclick="closeModalDirect()">Закрыть</button>
+        <button class="modal-btn modal-btn-map" id="modalMapBtn" onclick="openMap()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          Google Maps
+        </button>
+        <button class="modal-btn modal-btn-del" onclick="deleteFromModal()">🗑</button>
+      </div>
     </div>
-    <div class="export-grid">
-      <div class="exp-btn" onclick="exportData('csv')">📊<label>Скачать CSV</label></div>
-      <div class="exp-btn" onclick="exportData('json')">💾<label>Скачать JSON</label></div>
-      <div class="exp-btn" onclick="copyText()">📋<label>Копировать текст</label></div>
-      <div class="exp-btn" onclick="alert('HTML квитанция в разработке')">🧾<label>Квитанция HTML</label></div>
-    </div>
-    <button class="share-main" onclick="navigator.share({title:'Мои расходы', url:window.location.href})">ПОДЕЛИТЬСЯ</button>
-    <button onclick="closeModals()" style="width:100%; padding:20px; background:none; border:none; color:var(--muted)">Отмена</button>
   </div>
 </div>
 
-<div class="sheet-overlay" id="tripOverlay" onclick="if(event.target===this)closeModals()">
-  <div class="sheet">
-    <h2 style="margin-bottom:15px">Мои поездки</h2>
-    <div id="tripList"></div>
-    <button class="share-main" style="background:var(--accent); color:#fff" onclick="createNewTrip()">+ НОВАЯ ПОЕЗДКА</button>
-    <button onclick="closeModals()" style="width:100%; padding:20px; border:none; background:none; color:var(--muted)">Закрыть</button>
+<!-- TRIPS PANEL -->
+<div class="overlay" id="tripsOverlay" onclick="if(event.target===this)closeSheet('tripsOverlay')">
+  <div class="sheet" id="tripsSheet">
+    <div class="sheet-handle"></div>
+    <div class="panel-body">
+      <div class="panel-title">🗺️ Мои поездки</div>
+      <div class="panel-sub">Переключайтесь или начните новую поездку</div>
+      <div class="new-trip-form">
+        <input class="trip-name-input" id="newTripInput" placeholder="Название поездки..." maxlength="40">
+        <button class="btn-create" onclick="createTrip()">+ Создать</button>
+      </div>
+      <div class="trips-list" id="tripsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT PANEL -->
+<div class="overlay" id="exportOverlay" onclick="if(event.target===this)closeSheet('exportOverlay')">
+  <div class="sheet" id="exportSheet">
+    <div class="sheet-handle"></div>
+    <div class="panel-body">
+      <div class="panel-title">📤 Экспорт и обмен</div>
+      <div class="panel-sub">Сохраните или поделитесь данными поездки</div>
+      <select class="export-trip-sel" id="exportTripSel"></select>
+      <div class="export-grid">
+        <button class="export-btn" onclick="exportCSV()"><span class="export-btn-icon">📊</span><span>Скачать CSV</span></button>
+        <button class="export-btn" onclick="exportJSON()"><span class="export-btn-icon">💾</span><span>Скачать JSON</span></button>
+        <button class="export-btn" onclick="exportText()"><span class="export-btn-icon">📋</span><span>Копировать текст</span></button>
+        <button class="export-btn" onclick="exportReceipt()"><span class="export-btn-icon">🧾</span><span>Квитанция HTML</span></button>
+      </div>
+      <button class="share-btn" onclick="shareTrip()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Поделиться
+      </button>
+    </div>
   </div>
 </div>
 
 <script>
-const CURR = { 
-  'EUR': {r:1, s:'€', kw:['евро']}, 
-  'TRY': {r:0.028, s:'₺', kw:['лир']}, 
-  'RSD': {r:0.0085, s:'дин', kw:['динар']} 
+// ─────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────
+const STORE = 'triplog_v1';
+const CAT = {
+  fuel:  {icon:'⛽', label:'Топливо', color:'#38bdf8'},
+  hotel: {icon:'🏨', label:'Жильё',   color:'#818cf8'},
+  food:  {icon:'🍕', label:'Питание', color:'#34d399'},
 };
 
-let trips = JSON.parse(localStorage.getItem('trips_v3') || '[{"id":1,"name":"Путь к мечте","active":true}]');
-let entries = JSON.parse(localStorage.getItem('entries_v3') || '[]');
-let userLoc = null;
+// Currency symbols for display
+const CUR_SYM = {
+  EUR:'€', TRY:'₺', THB:'฿', USD:'$', GBP:'£',
+  GEL:'₾', AMD:'֏', AZN:'₼', RSD:'дин', HUF:'Ft',
+  PLN:'zł', CZK:'Kč', RON:'lei', BGN:'лв', HRK:'kn',
+  MKD:'ден', ALL:'L', BAM:'KM', MDL:'lei', UAH:'₴',
+};
 
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+let state = {trips:[], activeId:null};
+try { const s = localStorage.getItem(STORE); if(s) state = JSON.parse(s); } catch(e){}
+
+// Migrate from old key
+try {
+  const old = localStorage.getItem('trip_v8');
+  if(old && (!state.trips || state.trips.length === 0)) {
+    const ol = JSON.parse(old);
+    if(ol && ol.length > 0) {
+      const t = {id:uid(), name:'Моя поездка', createdAt:Date.now(), log:ol};
+      state.trips = [t]; state.activeId = t.id; save();
+    }
+  }
+} catch(e){}
+
+if(!state.trips || state.trips.length === 0) {
+  const t = {id:uid(), name:'Поездка 1', createdAt:Date.now(), log:[]};
+  state.trips = [t]; state.activeId = t.id; save();
+}
+if(!state.activeId || !state.trips.find(t => t.id === state.activeId)) {
+  state.activeId = state.trips[0].id;
+}
+
+function uid() { return Math.random().toString(36).slice(2,9) + Date.now().toString(36); }
+function activeTrip() { return state.trips.find(t => t.id === state.activeId) || state.trips[0]; }
+function getLog() { return activeTrip().log || []; }
+function save() { localStorage.setItem(STORE, JSON.stringify(state)); }
+
+// ─────────────────────────────────────────
+// CURRENCY / RATES
+// ─────────────────────────────────────────
+let rates = {}; // rates[CUR] = how many CUR per 1 EUR
+let rateTs = 0; // timestamp of last fetch
+let curCurrency = localStorage.getItem('trip_currency') || 'EUR';
+const RATE_TTL = 60 * 60 * 1000; // 1 hour cache
+
+document.getElementById('currencySelect').value = curCurrency;
+
+async function fetchRates() {
+  const badge = document.getElementById('rateBadge');
+  // Use cached rates from localStorage if fresh
+  try {
+    const cached = JSON.parse(localStorage.getItem('trip_rates') || '{}');
+    if(cached.ts && Date.now() - cached.ts < RATE_TTL && cached.rates) {
+      rates = cached.rates;
+      rateTs = cached.ts;
+      updateRateBadge();
+      return;
+    }
+  } catch(e){}
+
+  badge.className = 'rate-badge loading';
+  badge.textContent = '...';
+
+  // Free API — no key needed, EUR base
+  try {
+    const r = await fetch('https://api.frankfurter.app/latest?base=EUR');
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    rates = d.rates;
+    rates['EUR'] = 1;
+    rateTs = Date.now();
+    localStorage.setItem('trip_rates', JSON.stringify({ts: rateTs, rates}));
+    updateRateBadge();
+  } catch(e) {
+    // Fallback hardcoded approximate rates (updated 2025)
+    rates = {
+      EUR:1, TRY:36.2, THB:38.5, USD:1.08, GBP:0.86,
+      GEL:2.95, AMD:419, AZN:1.84, RSD:117, HUF:390,
+      PLN:4.25, CZK:25.1, RON:4.97, BGN:1.956, HRK:7.53,
+      MKD:61.5, ALL:103, BAM:1.956, MDL:19.2, UAH:44.5,
+    };
+    badge.className = 'rate-badge err';
+    badge.textContent = '⚠ офлайн';
+  }
+}
+
+function updateRateBadge() {
+  const badge = document.getElementById('rateBadge');
+  const cur = curCurrency;
+  if(cur === 'EUR') {
+    badge.className = 'rate-badge ok';
+    badge.textContent = '= 1 EUR';
+    return;
+  }
+  const r = rates[cur];
+  if(!r) { badge.className='rate-badge err'; badge.textContent='?'; return; }
+  badge.className = 'rate-badge ok';
+  // show: 1 EUR = X cur
+  badge.textContent = `1€ = ${r >= 100 ? Math.round(r) : r.toFixed(2)} ${CUR_SYM[cur]||cur}`;
+}
+
+function toEur(amount) {
+  if(curCurrency === 'EUR') return amount;
+  const r = rates[curCurrency];
+  if(!r) return amount;
+  return amount / r;
+}
+
+function onCurrencyChange() {
+  curCurrency = document.getElementById('currencySelect').value;
+  localStorage.setItem('trip_currency', curCurrency);
+  updateRateBadge();
+  // update mic label hint
+  updateMicHint();
+}
+
+function updateMicHint() {
+  const sym = CUR_SYM[curCurrency] || curCurrency;
+  document.getElementById('micLabel').textContent =
+    curCurrency === 'EUR' ? 'ЗАПИСАТЬ ГОЛОСОМ' : `ЗАПИСАТЬ ГОЛОСОМ (в ${sym})`;
+}
+
+// ─────────────────────────────────────────
 // GPS
-navigator.geolocation.watchPosition(p => {
-  userLoc = { lat: p.coords.latitude, lng: p.coords.longitude };
-  document.getElementById('gpsStatus').innerText = `📍 GPS: ${userLoc.lat.toFixed(3)}, ${userLoc.lng.toFixed(3)}`;
-}, null, {enableHighAccuracy:true});
-
-// Voice
-const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
-if(Rec) {
-  const r = new Rec(); r.lang = 'ru-RU';
-  r.onstart = () => document.getElementById('micBtn').classList.add('active');
-  r.onend = () => document.getElementById('micBtn').classList.remove('active');
-  r.onresult = (e) => parse(e.results[0][0].transcript.toLowerCase());
-  document.getElementById('micBtn').onclick = () => r.start();
+// ─────────────────────────────────────────
+let curLoc = {city:'Трасса', lat:null, lon:null};
+function initGps() {
+  if(!navigator.geolocation) return;
+  navigator.geolocation.watchPosition(async p => {
+    curLoc.lat = p.coords.latitude;
+    curLoc.lon = p.coords.longitude;
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${curLoc.lat}&lon=${curLoc.lon}&accept-language=ru`);
+      const d = await r.json();
+      curLoc.city = d.address.city || d.address.town || d.address.village || 'Трасса';
+      document.getElementById('geoLabel').textContent = curLoc.city.toUpperCase();
+    } catch { document.getElementById('geoLabel').textContent = 'В ПУТИ'; }
+  }, () => { document.getElementById('geoLabel').textContent = 'GPS недоступен'; },
+  {enableHighAccuracy:true, timeout:8000, maximumAge:0});
 }
 
-function parse(txt) {
-  const amt = parseFloat(txt.match(/\d+/)?.[0] || 0);
-  if(!amt) return;
-  
-  let cat = 'other';
-  if(txt.match(/бензин|топливо/)) cat = 'fuel';
-  else if(txt.match(/отель|жилье/)) cat = 'hotel';
-  else if(txt.match(/еда|обед|ужин/)) cat = 'food';
+// ─────────────────────────────────────────
+// THEME
+// ─────────────────────────────────────────
+const html = document.documentElement;
+let theme = localStorage.getItem('trip_theme') || 'dark';
+html.setAttribute('data-theme', theme);
+function setThemeIcon() {
+  document.getElementById('themeIcon').innerHTML = theme === 'dark'
+    ? `<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>`
+    : `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+  document.getElementById('metaThemeColor').content = theme === 'dark' ? '#07090f' : '#f0f4f8';
+}
+setThemeIcon();
+document.getElementById('themeBtn').onclick = () => {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', theme);
+  localStorage.setItem('trip_theme', theme);
+  setThemeIcon();
+};
 
-  let cCode = document.getElementById('currencyMain').value;
-  for(let k in CURR) if(CURR[k].kw.some(w => txt.includes(w))) cCode = k;
+// ─────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────
+let toastT;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2600);
+}
 
-  const activeTrip = trips.find(t => t.active);
-  entries.unshift({
-    id: Date.now(), tripId: activeTrip.id, title: txt.replace(/\d+/,'').trim() || 'Расход',
-    amt, curr: cCode, cat, loc: userLoc, date: new Date().toISOString()
+// ─────────────────────────────────────────
+// SHEET HELPERS
+// ─────────────────────────────────────────
+function openSheet(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeSheet(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+
+['modalSheet','tripsSheet','exportSheet'].forEach((sid, i) => {
+  const oid = ['modalOverlay','tripsOverlay','exportOverlay'][i];
+  let sy = 0;
+  const s = document.getElementById(sid);
+  s.addEventListener('touchstart', e => { sy = e.touches[0].clientY; }, {passive:true});
+  s.addEventListener('touchend', e => { if(e.changedTouches[0].clientY - sy > 80) closeSheet(oid); }, {passive:true});
+});
+
+// ─────────────────────────────────────────
+// CHARTS
+// ─────────────────────────────────────────
+function drawPie(data) {
+  const svg = document.getElementById('pieSvg'), leg = document.getElementById('pieLegend');
+  svg.innerHTML = ''; leg.innerHTML = '';
+  const cats = ['fuel','hotel','food'], total = cats.reduce((s,c) => s+(data[c]||0), 0);
+  if(!total) {
+    svg.innerHTML = `<circle cx="40" cy="40" r="30" fill="none" stroke="var(--border)" stroke-width="14"/>`;
+    cats.forEach(c => { leg.innerHTML += `<div class="legend-item"><div class="legend-dot" style="background:${CAT[c].color}"></div>${CAT[c].icon} ${CAT[c].label}<span class="legend-val">—</span></div>`; });
+    return;
+  }
+  let a = -Math.PI/2;
+  cats.forEach(c => {
+    const v = data[c]||0; if(!v) return;
+    const ang = (v/total)*2*Math.PI, ea = a+ang;
+    const x1=40+30*Math.cos(a), y1=40+30*Math.sin(a), x2=40+30*Math.cos(ea), y2=40+30*Math.sin(ea);
+    const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d', `M40,40 L${x1},${y1} A30,30 0 ${ang>Math.PI?1:0} 1 ${x2},${y2} Z`);
+    p.setAttribute('fill', CAT[c].color); p.setAttribute('opacity','0.9');
+    svg.appendChild(p); a = ea;
   });
-  save();
+  const h = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  h.setAttribute('cx',40); h.setAttribute('cy',40); h.setAttribute('r',16);
+  h.setAttribute('fill','var(--sheet-bg)'); svg.appendChild(h);
+  cats.forEach(c => {
+    const pct = Math.round((data[c]||0)/total*100);
+    leg.innerHTML += `<div class="legend-item"><div class="legend-dot" style="background:${CAT[c].color}"></div>${CAT[c].icon} ${CAT[c].label}<span class="legend-val">${pct}%</span></div>`;
+  });
 }
 
-function save() {
-  localStorage.setItem('trips_v3', JSON.stringify(trips));
-  localStorage.setItem('entries_v3', JSON.stringify(entries));
-  render();
+function drawBars(data) {
+  const cats = ['fuel','hotel','food'], max = Math.max(...cats.map(c => data[c]||0), 0.01);
+  document.getElementById('barWrap').innerHTML = cats.map(c => {
+    const v = data[c]||0, pct = (v/max)*100, lbl = v>=1000?(v/1000).toFixed(1)+'k':v.toFixed(0);
+    return `<div class="bar-col"><div class="bar-val">${v>0?lbl+'€':''}</div><div class="bar-track"><div class="bar-fill" style="height:${pct}%;background:${CAT[c].color}"></div></div><div class="bar-lbl">${CAT[c].icon}</div></div>`;
+  }).join('');
 }
 
+// ─────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────
 function render() {
-  const activeTrip = trips.find(t => t.active);
-  document.getElementById('currentTripName').innerText = activeTrip.name;
-  
-  const tripEntries = entries.filter(e => e.tripId === activeTrip.id);
-  const list = document.getElementById('history');
-  list.innerHTML = '';
-  
-  let total = 0, st = {fuel:0, hotel:0, food:0, other:0};
-  
-  tripEntries.forEach(e => {
-    const val = e.amt * CURR[e.curr].r;
-    total += val; st[e.cat] += val;
-    
-    const div = document.createElement('div');
-    div.className = 'entry';
-    div.innerHTML = `
-      <div style="font-size:24px">${{fuel:'⛽',hotel:'🏨',food:'🍕'}[e.cat]||'📦'}</div>
-      <div class="entry-info"><b>${e.title}</b><small>${new Date(e.date).toLocaleTimeString()}</small></div>
-      <div class="entry-amt">${e.amt}${CURR[e.curr].s}</div>
-    `;
-    list.appendChild(div);
+  const log = getLog();
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const cat = document.getElementById('filterCat').value;
+  const filtered = log.filter(it => {
+    if(cat && it.cat !== cat) return false;
+    if(q && !it.name.toLowerCase().includes(q) && !it.city.toLowerCase().includes(q)) return false;
+    return true;
   });
 
-  document.getElementById('totalEur').innerHTML = `${total.toFixed(2).split('.')[0]}<span>,${total.toFixed(2).split('.')[1]} €</span>`;
-  document.getElementById('s-fuel').innerText = st.fuel.toFixed(0)+'€';
-  document.getElementById('s-hotel').innerText = st.hotel.toFixed(0)+'€';
-  document.getElementById('s-food').innerText = st.food.toFixed(0)+'€';
-  
-  drawCharts(st);
+  const sums = {fuel:0, hotel:0, food:0}; let total = 0;
+  filtered.forEach(it => { sums[it.cat] = (sums[it.cat]||0) + it.eur; total += it.eur; });
+
+  const trip = activeTrip();
+  document.getElementById('heroTripName').textContent = trip.name;
+  document.getElementById('tripChipName').textContent = trip.name;
+  const [int,dec] = total.toFixed(2).replace('.',',').split(',');
+  document.getElementById('heroTotal').innerHTML = `${int}<span class="cents">,${dec} €</span>`;
+
+  const all = {fuel:0, hotel:0, food:0};
+  log.forEach(it => { all[it.cat] = (all[it.cat]||0) + it.eur; });
+  document.getElementById('s-fuel').textContent  = all.fuel.toFixed(0)+'€';
+  document.getElementById('s-hotel').textContent = all.hotel.toFixed(0)+'€';
+  document.getElementById('s-food').textContent  = all.food.toFixed(0)+'€';
+
+  drawPie(sums); drawBars(sums);
+
+  document.getElementById('histHdr').textContent = filtered.length === log.length
+    ? `Журнал расходов (${log.length})` : `Найдено: ${filtered.length} из ${log.length}`;
+
+  const h = document.getElementById('history');
+  if(!filtered.length) {
+    h.innerHTML = `<div class="empty"><div class="empty-icon">🗺️</div>${!log.length?'Добавьте первый расход голосом':'Ничего не найдено'}</div>`;
+    return;
+  }
+
+  h.innerHTML = filtered.map(item => {
+    const ri = log.indexOf(item);
+    // show original currency if not EUR
+    const origStr = (item.origAmount && item.origCurrency && item.origCurrency !== 'EUR')
+      ? `<div class="entry-orig">${item.origAmount.toFixed(2)} ${CUR_SYM[item.origCurrency]||item.origCurrency}</div>`
+      : '';
+    return `<div class="entry" onclick="openModal(${ri})">
+      <div class="entry-icon">${CAT[item.cat]?.icon||'💶'}</div>
+      <div class="entry-body">
+        <div class="entry-name">${item.name}</div>
+        <div class="entry-meta"><span class="entry-city">📍 ${item.city}</span><span class="entry-time">${item.date} ${item.time}</span></div>
+      </div>
+      <div style="flex-shrink:0;text-align:right">
+        <div class="entry-amount">${item.eur.toFixed(2)}€</div>
+        ${origStr}
+      </div>
+      <button class="del-btn" onclick="event.stopPropagation();delEntry(${ri})">✕</button>
+    </div>`;
+  }).join('');
 }
 
-function drawCharts(st) {
-  const bar = document.getElementById('barCont'); bar.innerHTML = '';
-  const max = Math.max(...Object.values(st), 1);
-  Object.values(st).forEach(v => {
-    bar.innerHTML += `<div class="bar" style="height:${(v/max)*100}%"></div>`;
-  });
+function delEntry(i) {
+  if(!confirm('Удалить запись?')) return;
+  activeTrip().log.splice(i, 1); save(); render(); showToast('🗑️ Удалено');
 }
 
-// UI Modals
-function showExportMenu() { document.getElementById('exportOverlay').classList.add('active'); }
-function showTripManager() {
-  const list = document.getElementById('tripList');
-  list.innerHTML = trips.map(t => `
-    <div class="entry" onclick="switchTrip(${t.id})" style="border:${t.active?'1px solid var(--accent)':'none'}">
-      <div style="flex:1"><b>${t.name}</b></div>
-      ${t.active ? '✅' : ''}
-    </div>
-  `).join('');
-  document.getElementById('tripOverlay').classList.add('active');
-}
-function closeModals() { document.querySelectorAll('.sheet-overlay').forEach(o => o.classList.remove('active')); }
+// ─────────────────────────────────────────
+// VOICE
+// ─────────────────────────────────────────
+let rec;
+try {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(SR) { rec = new SR(); rec.lang = 'ru-RU'; rec.interimResults = false; rec.maxAlternatives = 3; }
+} catch(e) {}
 
+const micBtn   = document.getElementById('micBtn');
+const micLabel = document.getElementById('micLabel');
+
+if(!rec) {
+  micBtn.onclick = () => showToast('⚠️ Голос не поддерживается в этом браузере');
+} else {
+  micBtn.onclick = () => { try { rec.start(); } catch(e) {} };
+  rec.onstart = () => { micBtn.classList.add('recording'); micLabel.textContent = '● СЛУШАЮ...'; };
+  rec.onend   = () => { micBtn.classList.remove('recording'); updateMicHint(); };
+  rec.onerror = e  => showToast('⚠️ ' + (e.error === 'not-allowed' ? 'Нет доступа к микрофону' : 'Ошибка распознавания'));
+
+  rec.onresult = e => {
+    const text = e.results[0][0].transcript.toLowerCase();
+
+    // Extract number — support "тысяча", "500", "тысяча двести" etc.
+    let num = extractNumber(text);
+    if(!num || num <= 0) { showToast('❓ Сумма не распознана: «' + text + '»'); return; }
+
+    // Category detection
+    let cat = 'food', name = 'Питание';
+    if(/отел|ночлег|ночь|жил|хостел|апарт/.test(text)) { cat = 'hotel'; name = 'Жильё'; }
+    else if(/заправк|бензин|дизел|топлив|газ|солярк/.test(text)) { cat = 'fuel'; name = 'Топливо'; }
+
+    // Convert to EUR
+    const origAmount = num;
+    const origCurrency = curCurrency;
+    const eurAmount = toEur(num);
+
+    const now = new Date();
+    const sym = CUR_SYM[origCurrency] || origCurrency;
+
+    activeTrip().log.unshift({
+      name, eur: eurAmount, cat,
+      origAmount, origCurrency,
+      city: curLoc.city, lat: curLoc.lat, lon: curLoc.lon,
+      time: now.toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit'}),
+      date: now.toLocaleDateString('ru-RU', {day:'numeric', month:'short'}),
+    });
+    save(); render();
+
+    const toastMsg = origCurrency === 'EUR'
+      ? `${CAT[cat].icon} +${eurAmount.toFixed(2)}€ — ${name}`
+      : `${CAT[cat].icon} ${origAmount.toFixed(0)}${sym} → ${eurAmount.toFixed(2)}€ — ${name}`;
+    showToast(toastMsg);
+  };
+}
+
+// Smart number extraction from Russian speech
+function extractNumber(text) {
+  // Try direct number first
+  const directMatch = text.replace(',', '.').match(/(\d+(?:\.\d+)?)/);
+  if(directMatch) return parseFloat(directMatch[1]);
+
+  // Russian word numbers (common amounts)
+  const wordMap = {
+    'ноль':0,'один':1,'одна':1,'два':2,'две':2,'три':3,'четыре':4,'пять':5,
+    'шесть':6,'семь':7,'восемь':8,'девять':9,'десять':10,'одиннадцать':11,
+    'двенадцать':12,'тринадцать':13,'четырнадцать':14,'пятнадцать':15,
+    'шестнадцать':16,'семнадцать':17,'восемнадцать':18,'девятнадцать':19,
+    'двадцать':20,'тридцать':30,'сорок':40,'пятьдесят':50,'шестьдесят':60,
+    'семьдесят':70,'восемьдесят':80,'девяносто':90,'сто':100,'двести':200,
+    'триста':300,'четыреста':400,'пятьсот':500,'шестьсот':600,'семьсот':700,
+    'восемьсот':800,'девятьсот':900,'тысяча':1000,'тысячу':1000,'тысячи':1000,
+  };
+  let total = 0, current = 0;
+  const words = text.split(/\s+/);
+  for(const w of words) {
+    const v = wordMap[w];
+    if(v !== undefined) {
+      if(v >= 1000) { total += (current || 1) * v; current = 0; }
+      else current += v;
+    }
+  }
+  total += current;
+  return total > 0 ? total : null;
+}
+
+// ─────────────────────────────────────────
+// DETAIL MODAL
+// ─────────────────────────────────────────
+let mIdx = null;
+function openModal(i) {
+  const item = getLog()[i]; if(!item) return; mIdx = i;
+  const cat = CAT[item.cat] || CAT.food;
+  document.getElementById('modalBadge').innerHTML = `${cat.icon} <span style="color:${cat.color}">${cat.label}</span>`;
+  document.getElementById('modalTitle').textContent = item.name;
+  document.getElementById('modalAmount').textContent = item.eur.toFixed(2) + ' €';
+
+  // show original currency conversion
+  const origEl = document.getElementById('modalAmountOrig');
+  if(item.origAmount && item.origCurrency && item.origCurrency !== 'EUR') {
+    const sym = CUR_SYM[item.origCurrency] || item.origCurrency;
+    origEl.textContent = `= ${item.origAmount.toFixed(2)} ${sym} (курс: 1€ = ${(rates[item.origCurrency]||'?')} ${sym})`;
+  } else {
+    origEl.textContent = '';
+  }
+
+  document.getElementById('modalCity').textContent = item.city;
+  document.getElementById('modalDate').textContent = item.date;
+  document.getElementById('modalTime').textContent = item.time;
+  document.getElementById('modalCatName').textContent = cat.label;
+
+  const th = document.getElementById('modalMapThumb'), mb = document.getElementById('modalMapBtn');
+  if(item.lat && item.lon) {
+    const la = item.lat.toFixed(6), lo = item.lon.toFixed(6);
+    document.getElementById('modalCoords').textContent = `${la}, ${lo}`;
+    mb.style.display = 'flex';
+    th.innerHTML = `<iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${(item.lon-.01).toFixed(5)},${(item.lat-.008).toFixed(5)},${(item.lon+.01).toFixed(5)},${(item.lat+.008).toFixed(5)}&layer=mapnik&marker=${la},${lo}" style="width:100%;height:100%;border:none;pointer-events:none" scrolling="no"></iframe><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none"><div style="background:var(--accent);width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,.4),0 0 0 6px rgba(56,189,248,.25)"></div></div>`;
+  } else {
+    document.getElementById('modalCoords').textContent = 'Координаты не записаны';
+    mb.style.display = 'none';
+    th.innerHTML = `<div class="modal-map-nocoords"><span style="font-size:32px">🗺️</span>GPS не был доступен при записи</div>`;
+  }
+  openSheet('modalOverlay');
+}
+function closeModalDirect() { closeSheet('modalOverlay'); setTimeout(() => { document.getElementById('modalMapThumb').innerHTML = ''; }, 350); }
+function openMap() { if(mIdx===null) return; const it = getLog()[mIdx]; if(!it?.lat) return; window.open(`https://www.google.com/maps?q=${it.lat},${it.lon}`, '_blank'); }
+function deleteFromModal() {
+  if(mIdx===null) return; if(!confirm('Удалить запись?')) return;
+  activeTrip().log.splice(mIdx, 1); save(); render(); closeModalDirect(); showToast('🗑️ Удалено');
+}
+
+// ─────────────────────────────────────────
+// TRIPS
+// ─────────────────────────────────────────
+function openTripsPanel() { renderTripsList(); openSheet('tripsOverlay'); }
+function renderTripsList() {
+  document.getElementById('tripsList').innerHTML = state.trips.map(t => {
+    const tot = (t.log||[]).reduce((s,i) => s+i.eur, 0);
+    const isA = t.id === state.activeId;
+    const d = new Date(t.createdAt).toLocaleDateString('ru-RU', {day:'numeric',month:'short',year:'numeric'});
+    return `<div class="trip-item ${isA?'active-trip':''}" onclick="switchTrip('${t.id}')">
+      <div style="font-size:24px">${isA?'✅':'🗺️'}</div>
+      <div class="trip-item-info">
+        <div class="trip-item-name">${t.name}${isA?'<span class="active-badge">активна</span>':''}</div>
+        <div class="trip-item-meta">${d} · ${(t.log||[]).length} зап.</div>
+      </div>
+      <div class="trip-item-total">${tot.toFixed(0)}€</div>
+      ${!isA?`<button class="trip-del-btn" onclick="event.stopPropagation();deleteTrip('${t.id}')">🗑</button>`:''}
+    </div>`;
+  }).join('');
+}
+function createTrip() {
+  const inp = document.getElementById('newTripInput');
+  const name = inp.value.trim() || `Поездка ${state.trips.length+1}`;
+  const t = {id:uid(), name, createdAt:Date.now(), log:[]};
+  state.trips.unshift(t); state.activeId = t.id; save();
+  inp.value = ''; renderTripsList(); render();
+  showToast(`🗺️ «${name}» создана`);
+}
 function switchTrip(id) {
-  trips.forEach(t => t.active = (t.id === id));
-  save(); closeModals();
+  state.activeId = id; save(); renderTripsList(); render();
+  closeSheet('tripsOverlay'); showToast('✅ Поездка переключена');
+}
+function deleteTrip(id) {
+  if(state.trips.length <= 1) { showToast('⚠️ Нельзя удалить единственную поездку'); return; }
+  if(!confirm('Удалить поездку и все расходы?')) return;
+  state.trips = state.trips.filter(t => t.id !== id);
+  if(state.activeId === id) state.activeId = state.trips[0].id;
+  save(); renderTripsList(); render(); showToast('🗑️ Поездка удалена');
 }
 
-function createNewTrip() {
-  const name = prompt('Назовите поездку:');
-  if(!name) return;
-  trips.forEach(t => t.active = false);
-  trips.push({id:Date.now(), name, active:true});
-  save(); closeModals();
+// ─────────────────────────────────────────
+// EXPORT
+// ─────────────────────────────────────────
+function openExportPanel() {
+  document.getElementById('exportTripSel').innerHTML = state.trips.map(t =>
+    `<option value="${t.id}"${t.id===state.activeId?' selected':''}>${t.name} (${(t.log||[]).reduce((s,i)=>s+i.eur,0).toFixed(0)}€)</option>`
+  ).join('');
+  openSheet('exportOverlay');
+}
+function getET() { return state.trips.find(t => t.id === document.getElementById('exportTripSel').value) || activeTrip(); }
+function dl(name, type, content) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content],{type})); a.download = name; a.click(); }
+
+function exportCSV() {
+  const t = getET();
+  const rows = [['Название','Сумма (€)','Сумма ориг.','Валюта','Категория','Город','Дата','Время','Широта','Долгота']];
+  (t.log||[]).forEach(i => rows.push([
+    i.name, i.eur.toFixed(2),
+    i.origAmount ? i.origAmount.toFixed(2) : i.eur.toFixed(2),
+    i.origCurrency || 'EUR',
+    CAT[i.cat]?.label||i.cat, i.city, i.date, i.time, i.lat||'', i.lon||''
+  ]));
+  dl(`${t.name}.csv`, 'text/csv', '\uFEFF'+rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n'));
+  showToast('📊 CSV сохранён');
+}
+function exportJSON() {
+  const t = getET();
+  dl(`${t.name}.json`, 'application/json', JSON.stringify({trip:t.name, created:new Date(t.createdAt).toLocaleDateString('ru-RU'), entries:t.log}, null, 2));
+  showToast('💾 JSON сохранён');
+}
+function exportText() {
+  const t = getET(), tot = (t.log||[]).reduce((s,i) => s+i.eur, 0);
+  const sm = {fuel:0, hotel:0, food:0}; (t.log||[]).forEach(i => { sm[i.cat]=(sm[i.cat]||0)+i.eur; });
+  let tx = `🗺️ ПОЕЗДКА: ${t.name}\n📅 ${new Date(t.createdAt).toLocaleDateString('ru-RU')}\n${'─'.repeat(30)}\n`;
+  tx += `💶 ИТОГО: ${tot.toFixed(2)} €\n⛽ Топливо: ${sm.fuel.toFixed(2)} €\n🏨 Жильё: ${sm.hotel.toFixed(2)} €\n🍕 Питание: ${sm.food.toFixed(2)} €\n${'─'.repeat(30)}\n`;
+  (t.log||[]).forEach(i => {
+    const orig = (i.origAmount && i.origCurrency && i.origCurrency !== 'EUR')
+      ? ` (${i.origAmount.toFixed(0)}${CUR_SYM[i.origCurrency]||i.origCurrency})`
+      : '';
+    tx += `${CAT[i.cat]?.icon} ${i.name} — ${i.eur.toFixed(2)}€${orig}  📍${i.city}  ${i.date} ${i.time}\n`;
+  });
+  navigator.clipboard.writeText(tx).then(() => showToast('📋 Скопировано!')).catch(() => showToast('⚠️ Не удалось скопировать'));
+}
+function exportReceipt() {
+  const t = getET(), tot = (t.log||[]).reduce((s,i) => s+i.eur, 0);
+  const sm = {fuel:0, hotel:0, food:0}; (t.log||[]).forEach(i => { sm[i.cat]=(sm[i.cat]||0)+i.eur; });
+  const rows = (t.log||[]).map(i => {
+    const orig = (i.origAmount && i.origCurrency && i.origCurrency !== 'EUR')
+      ? `<br><small style="color:#8899bb">${i.origAmount.toFixed(0)} ${CUR_SYM[i.origCurrency]||i.origCurrency}</small>`
+      : '';
+    return `<tr><td>${CAT[i.cat]?.icon} ${i.name}</td><td>${i.city}</td><td>${i.date} ${i.time}</td><td class="r">${i.eur.toFixed(2)} €${orig}</td></tr>`;
+  }).join('');
+  const html = `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><title>${t.name}</title>
+<style>*{box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;max-width:640px;margin:40px auto;padding:24px;color:#1a2236;background:#f8fafc}
+h1{font-size:26px;font-weight:900;margin-bottom:2px}.sub{color:#8899bb;font-size:13px;margin-bottom:24px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat{background:#fff;border:1px solid #e8eef8;border-radius:14px;padding:14px;text-align:center}
+.sv{font-size:20px;font-weight:800;color:#0284c7}.sl{font-size:10px;color:#8899bb;text-transform:uppercase;letter-spacing:1px}
+.total{font-size:28px;font-weight:900;color:#0284c7;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:10px 12px;border-bottom:1px solid #eef0f5;text-align:left}
+th{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8899bb;font-weight:700}.r{text-align:right;font-weight:700}
+</style></head><body>
+<h1>🗺️ ${t.name}</h1><div class="sub">Создана: ${new Date(t.createdAt).toLocaleDateString('ru-RU')} · ${(t.log||[]).length} записей</div>
+<div class="stats">
+<div class="stat"><div class="sv">${sm.fuel.toFixed(0)} €</div><div class="sl">⛽ Топливо</div></div>
+<div class="stat"><div class="sv">${sm.hotel.toFixed(0)} €</div><div class="sl">🏨 Жильё</div></div>
+<div class="stat"><div class="sv">${sm.food.toFixed(0)} €</div><div class="sl">🍕 Питание</div></div>
+</div><div class="total">Итого: ${tot.toFixed(2)} €</div>
+<table><tr><th>Расход</th><th>Место</th><th>Дата</th><th class="r">Сумма</th></tr>${rows}</table>
+</body></html>`;
+  dl(`${t.name}_квитанция.html`, 'text/html', html);
+  showToast('🧾 Квитанция сохранена');
+}
+async function shareTrip() {
+  const t = getET(), tot = (t.log||[]).reduce((s,i) => s+i.eur, 0);
+  const sm = {fuel:0, hotel:0, food:0}; (t.log||[]).forEach(i => { sm[i.cat]=(sm[i.cat]||0)+i.eur; });
+  const text = `🗺️ ${t.name}\n💶 Итого: ${tot.toFixed(2)} €\n⛽ ${sm.fuel.toFixed(0)}€  🏨 ${sm.hotel.toFixed(0)}€  🍕 ${sm.food.toFixed(0)}€\n\n#TripLog`;
+  if(navigator.share) {
+    try { await navigator.share({title:`TripLog — ${t.name}`, text}); showToast('✅ Поделились!'); }
+    catch(err) { if(err.name !== 'AbortError') exportText(); }
+  } else {
+    navigator.clipboard.writeText(text).then(() => showToast('📋 Скопировано!')).catch(() => showToast('⚠️ Используйте «Копировать текст»'));
+  }
 }
 
-function exportData(type) {
-  const data = JSON.stringify(entries.filter(e => e.tripId === trips.find(t=>t.active).id));
-  const blob = new Blob([data], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = `trip.${type}`; a.click();
-}
+// ─────────────────────────────────────────
+// EVENTS & INIT
+// ─────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', render);
+document.getElementById('filterCat').addEventListener('change', render);
 
-render();
+initGps();
+fetchRates().then(() => { updateMicHint(); render(); });
 </script>
 </body>
 </html>
