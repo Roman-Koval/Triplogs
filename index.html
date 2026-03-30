@@ -1,325 +1,504 @@
 <!doctype html>
 <html lang="ru" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta charset="UTF-8">
+  <title>Trip Tracker</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#020617">
 
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#020617">
+  <script>
+    tailwind = { config: { darkMode: 'class' } };
+  </script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <title>Trip Tracker</title>
-
-    <!-- Tailwind config -->
-    <script>
-        tailwind = { config: { darkMode: 'class' } };
-    </script>
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-
-    <!-- Icons + Charts -->
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        body {
-            background: #020617;
-            color: #f8fafc;
-            font-family: system-ui, sans-serif;
-            overflow-x: hidden;
-        }
-        .glass {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            backdrop-filter: blur(12px);
-        }
-        html:not(.dark) body {
-            background: #e5e7eb;
-            color: #020617;
-        }
-        html:not(.dark) .glass {
-            background: rgba(255, 255, 255, 0.85);
-            border-color: rgba(148, 163, 184, 0.4);
-        }
-        .recording {
-            animation: pulse 1.5s infinite;
-            background: #ef4444 !important;
-            color: #fff !important;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
-        }
-    </style>
+  <style>
+    body{background:#020617;color:#f9fafb;font-family:system-ui,sans-serif;}
+    html:not(.dark) body{background:#e5e7eb;color:#020617;}
+    .glass{background:rgba(15,23,42,.85);border:1px solid rgba(148,163,184,.35);backdrop-filter:blur(14px);}
+    html:not(.dark) .glass{background:rgba(255,255,255,.9);border-color:rgba(148,163,184,.5);}
+    .recording{animation:pulse 1.4s infinite;background:#ef4444!important;color:#fff!important;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  </style>
 </head>
-
 <body class="p-4">
-<div class="max-w-md mx-auto space-y-4 relative">
+<div class="max-w-md mx-auto space-y-4 relative pb-10">
 
-    <!-- Theme toggle -->
-    <button id="themeToggle"
-            class="absolute -top-1 right-0 p-3 glass rounded-full active:scale-95 transition">
-        <i id="themeIcon" data-lucide="sun"></i>
+  <!-- Theme toggle -->
+  <button id="themeToggle" class="absolute -top-1 right-0 p-3 glass rounded-full active:scale-95 transition">
+    <i id="themeIcon" data-lucide="sun"></i>
+  </button>
+
+  <!-- Top: trip selector + add -->
+  <div class="flex items-center justify-between mt-6 mb-1">
+    <button id="tripSelectorBtn" class="flex items-center gap-1 text-sm font-semibold glass px-3 py-2 rounded-2xl">
+      <span id="tripSelectorLabel">Выберите поездку</span>
+      <i data-lucide="chevron-down" class="w-4 h-4"></i>
     </button>
-
-    <!-- Total + GPS -->
-    <div class="glass rounded-[32px] p-6 text-center shadow-2xl mt-6">
-        <div id="total" class="text-5xl font-black mb-1">0,00 €</div>
-        <div id="geo" class="text-[10px] text-cyan-400 font-bold tracking-widest uppercase italic">
-            📍 Ожидание GPS...
-        </div>
-    </div>
-
-    <!-- Mic -->
-    <button id="micBtn"
-            class="w-full h-24 bg-white text-black rounded-3xl font-black text-xl flex items-center justify-center gap-3 active:scale-95 transition-all dark:bg-slate-100 dark:text-slate-900">
-        <i data-lucide="mic"></i> ЗАПИСАТЬ ГОЛОСОМ
+    <button id="newTripBtn" class="w-10 h-10 rounded-full glass flex items-center justify-center active:scale-95">
+      <span class="text-xl font-bold">+</span>
     </button>
+  </div>
 
-    <!-- Filters -->
-    <div class="glass rounded-3xl p-4 space-y-3">
-        <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Фильтры и поиск</h3>
+  <!-- Trip selector dropdown -->
+  <div id="tripDropdown" class="hidden glass rounded-2xl p-2 text-sm space-y-1 mt-1">
+    <!-- items injected -->
+  </div>
 
-        <input id="searchInput" type="text"
-               placeholder="Поиск по названию или городу..."
-               class="w-full rounded-2xl px-3 py-2 text-sm bg-slate-900/40 border border-slate-700/60 focus:ring-2 focus:ring-cyan-500 dark:bg-slate-900/40">
+  <!-- Header block -->
+  <div class="glass rounded-[28px] p-5 shadow-2xl">
+    <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1" id="tripTitle">Путь к мечте</div>
+    <div class="text-[11px] text-slate-500 mb-2">Общие расходы</div>
+    <div id="totalAmount" class="text-4xl font-black mb-1">0,00 €</div>
+    <div id="geo" class="text-[10px] text-cyan-400 font-bold tracking-widest uppercase italic">
+      📍 Ожидание GPS...
+    </div>
+  </div>
 
-        <div class="flex gap-2 text-xs">
-            <button data-cat="all" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-800 text-slate-100 font-bold">Все</button>
-            <button data-cat="fuel" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold">Топливо</button>
-            <button data-cat="hotel" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold">Жильё</button>
-            <button data-cat="food" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold">Питание</button>
-        </div>
+  <!-- Category cards -->
+  <div class="grid grid-cols-3 gap-2">
+    <div class="glass rounded-2xl p-3 flex flex-col justify-between">
+      <div class="flex items-center justify-between text-[11px] mb-1">
+        <span class="font-semibold">Топливо</span>
+        <span class="text-xs" id="fuelPercent">0%</span>
+      </div>
+      <div class="text-xs text-slate-400 mb-1">⛽</div>
+      <div class="text-sm font-bold" id="fuelAmount">0,00 €</div>
+    </div>
+    <div class="glass rounded-2xl p-3 flex flex-col justify-between">
+      <div class="flex items-center justify-between text-[11px] mb-1">
+        <span class="font-semibold">Жильё</span>
+        <span class="text-xs" id="hotelPercent">0%</span>
+      </div>
+      <div class="text-xs text-slate-400 mb-1">🏨</div>
+      <div class="text-sm font-bold" id="hotelAmount">0,00 €</div>
+    </div>
+    <div class="glass rounded-2xl p-3 flex flex-col justify-between">
+      <div class="flex items-center justify-between text-[11px] mb-1">
+        <span class="font-semibold">Питание</span>
+        <span class="text-xs" id="foodPercent">0%</span>
+      </div>
+      <div class="text-xs text-slate-400 mb-1">🍕</div>
+      <div class="text-sm font-bold" id="foodAmount">0,00 €</div>
+    </div>
+  </div>
+
+  <!-- Mic -->
+  <button id="micBtn"
+          class="w-full h-16 bg-white text-black rounded-3xl font-black text-base flex items-center justify-center gap-2 active:scale-95 transition-all dark:bg-slate-100 dark:text-slate-900">
+    <i data-lucide="mic"></i> ЗАПИСАТЬ ГОЛОСОМ
+  </button>
+
+  <!-- Filters + search -->
+  <div class="glass rounded-3xl p-4 space-y-3">
+    <div class="flex items-center justify-between">
+      <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Фильтры и поиск</h3>
+      <div class="flex gap-2 text-[10px]">
+        <button id="exportBtn" class="px-2 py-1 rounded-xl bg-slate-900/60 text-slate-100 dark:bg-slate-100 dark:text-slate-900">Экспорт</button>
+        <button id="importBtn" class="px-2 py-1 rounded-xl bg-slate-900/60 text-slate-100 dark:bg-slate-100 dark:text-slate-900">Импорт</button>
+        <input id="importFile" type="file" accept=".json" class="hidden">
+      </div>
     </div>
 
-    <!-- Charts -->
-    <div class="space-y-3">
-        <h3 class="text-[10px] font-bold text-slate-500 uppercase px-2 tracking-widest">Аналитика расходов</h3>
+    <input id="searchInput" type="text"
+           placeholder="Поиск по названию или городу..."
+           class="w-full rounded-2xl px-3 py-2 text-sm bg-slate-900/40 border border-slate-700/60 focus:ring-2 focus:ring-cyan-500 dark:bg-slate-900/40">
 
-        <div class="glass p-4 rounded-3xl">
-            <canvas id="pieChart" height="180"></canvas>
-        </div>
-
-        <div class="glass p-4 rounded-3xl">
-            <canvas id="barChart" height="180"></canvas>
-        </div>
+    <div class="flex gap-2 text-xs">
+      <button data-cat="all" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-800 text-slate-100 font-bold">Все</button>
+      <button data-cat="fuel" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold">Топливо</button>
+      <button data-cat="hotel" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold">Жильё</button>
+      <button data-cat="food" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold">Питание</button>
     </div>
+  </div>
 
-    <!-- History -->
-    <div class="space-y-3">
-        <h3 class="text-[10px] font-bold text-slate-500 uppercase px-2 tracking-widest">Детальный журнал</h3>
-        <div id="history" class="space-y-3 pb-10"></div>
+  <!-- Charts -->
+  <div class="space-y-3">
+    <h3 class="text-[10px] font-bold text-slate-500 uppercase px-1 tracking-widest">Аналитика расходов</h3>
+    <div class="glass p-4 rounded-3xl">
+      <div class="text-[11px] mb-2 text-slate-400">По категориям</div>
+      <canvas id="pieChart" height="160"></canvas>
     </div>
+    <div class="glass p-4 rounded-3xl">
+      <div class="text-[11px] mb-2 text-slate-400">Суммы</div>
+      <canvas id="barChart" height="160"></canvas>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="space-y-2">
+    <div class="flex items-center justify-between px-1">
+      <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Журнал расходов</h3>
+      <span id="historyCount" class="text-[10px] text-slate-400"></span>
+    </div>
+    <div id="history" class="space-y-3 pb-10"></div>
+  </div>
 
 </div>
 
+<!-- New trip modal -->
+<div id="newTripModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+  <div class="glass rounded-3xl p-5 w-full max-w-sm">
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-sm font-bold">Новая поездка</h2>
+      <button id="closeNewTrip" class="text-xs text-slate-400">Закрыть</button>
+    </div>
+    <label class="block text-xs mb-1">Название поездки</label>
+    <input id="newTripName" type="text" class="w-full mb-3 px-3 py-2 rounded-2xl text-sm bg-slate-900/40 border border-slate-700/60 dark:bg-slate-900/40">
+    <label class="block text-xs mb-1">Дата начала</label>
+    <input id="newTripDate" type="date" class="w-full mb-4 px-3 py-2 rounded-2xl text-sm bg-slate-900/40 border border-slate-700/60 dark:bg-slate-900/40">
+    <button id="createTripBtn" class="w-full py-2 rounded-2xl bg-cyan-500 text-white font-bold text-sm active:scale-95">Создать</button>
+  </div>
+</div>
+
 <script>
-/* -------------------- DATA -------------------- */
-let log = JSON.parse(localStorage.getItem('trip_v7')) || [];
-let curLoc = { city: "Трасса", lat: null, lon: null };
-
+/* ---------- STATE ---------- */
+let trips = JSON.parse(localStorage.getItem('trips_v1') || '[]');
+let currentTripId = localStorage.getItem('current_trip_id') || null;
 let currentFilter = { cat: 'all', search: '' };
-
-/* -------------------- GPS -------------------- */
-function initGps() {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.watchPosition(async p => {
-        curLoc.lat = p.coords.latitude;
-        curLoc.lon = p.coords.longitude;
-
-        try {
-            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${curLoc.lat}&lon=${curLoc.lon}&accept-language=ru`);
-            const d = await r.json();
-            curLoc.city = d.address.city || d.address.town || d.address.village || "Трасса";
-            geo.innerText = "📍 " + curLoc.city.toUpperCase();
-        } catch {
-            geo.innerText = "📍 В ПУТИ";
-        }
-    }, () => geo.innerText = "📍 ОШИБКА GPS");
-}
-
-/* -------------------- THEME -------------------- */
-function applyTheme(t) {
-    document.documentElement.classList.toggle('dark', t === 'dark');
-    localStorage.setItem('theme', t);
-    themeIcon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
-    lucide.createIcons();
-}
-applyTheme(localStorage.getItem('theme') || 'dark');
-
-themeToggle.onclick = () => {
-    const t = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-    applyTheme(t);
-};
-
-/* -------------------- CURRENCY -------------------- */
+let curLoc = { city: "Трасса", lat: null, lon: null };
 let fxRates = JSON.parse(localStorage.getItem('fx_rates') || 'null');
-
-async function loadRates() {
-    const now = Date.now();
-    if (fxRates && now - fxRates.timestamp < 3600000) return;
-
-    try {
-        const r = await fetch("https://api.exchangerate.host/latest?base=EUR&symbols=EUR,TRY,USD,GBP,PLN,CZK,HUF,RON,GEL");
-        const d = await r.json();
-        fxRates = { rates: d.rates, timestamp: now };
-        localStorage.setItem('fx_rates', JSON.stringify(fxRates));
-    } catch {}
-}
-
-function detectCurrency(t) {
-    if (t.includes('лир') || t.includes('турец')) return 'TRY';
-    if (t.includes('доллар')) return 'USD';
-    if (t.includes('фунт')) return 'GBP';
-    if (t.includes('злот')) return 'PLN';
-    if (t.includes('крон')) return 'CZK';
-    if (t.includes('форинт')) return 'HUF';
-    if (t.includes('лей') || t.includes('леев') || t.includes('лея')) return 'RON';
-    if (t.includes('лари')) return 'GEL';
-    return 'EUR';
-}
-
-async function convertToEur(amount, cur) {
-    if (cur === 'EUR') return amount;
-    await loadRates();
-    const rate = fxRates?.rates?.[cur];
-    return rate ? amount / rate : amount;
-}
-
-/* -------------------- FILTERS -------------------- */
-function getFilteredLog() {
-    return log.filter(i =>
-        (currentFilter.cat === 'all' || i.cat === currentFilter.cat) &&
-        (!currentFilter.search ||
-            i.name.toLowerCase().includes(currentFilter.search) ||
-            i.city.toLowerCase().includes(currentFilter.search))
-    );
-}
-
-/* -------------------- CHARTS -------------------- */
 let pieChart, barChart;
 
-function updateCharts() {
-    const items = getFilteredLog();
-    const sums = { fuel: 0, hotel: 0, food: 0 };
-    items.forEach(i => sums[i.cat] += i.eur);
+/* ---------- DOM ---------- */
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const tripSelectorBtn = document.getElementById('tripSelectorBtn');
+const tripSelectorLabel = document.getElementById('tripSelectorLabel');
+const tripDropdown = document.getElementById('tripDropdown');
+const newTripBtn = document.getElementById('newTripBtn');
+const newTripModal = document.getElementById('newTripModal');
+const closeNewTrip = document.getElementById('closeNewTrip');
+const newTripName = document.getElementById('newTripName');
+const newTripDate = document.getElementById('newTripDate');
+const createTripBtn = document.getElementById('createTripBtn');
 
-    const labels = ["Топливо", "Жильё", "Питание"];
-    const data = [sums.fuel, sums.hotel, sums.food];
+const tripTitle = document.getElementById('tripTitle');
+const totalAmount = document.getElementById('totalAmount');
+const geo = document.getElementById('geo');
+const fuelPercent = document.getElementById('fuelPercent');
+const hotelPercent = document.getElementById('hotelPercent');
+const foodPercent = document.getElementById('foodPercent');
+const fuelAmount = document.getElementById('fuelAmount');
+const hotelAmount = document.getElementById('hotelAmount');
+const foodAmount = document.getElementById('foodAmount');
+const micBtn = document.getElementById('micBtn');
+const searchInput = document.getElementById('searchInput');
+const historyEl = document.getElementById('history');
+const historyCount = document.getElementById('historyCount');
+const exportBtn = document.getElementById('exportBtn');
+const importBtn = document.getElementById('importBtn');
+const importFile = document.getElementById('importFile');
+const pieChartEl = document.getElementById('pieChart');
+const barChartEl = document.getElementById('barChart');
 
-    if (!pieChart) {
-        pieChart = new Chart(pieChartEl, {
-            type: 'pie',
-            data: { labels, datasets: [{ data, backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"] }] }
-        });
-    } else {
-        pieChart.data.datasets[0].data = data;
-        pieChart.update();
-    }
-
-    if (!barChart) {
-        barChart = new Chart(barChartEl, {
-            type: 'bar',
-            data: { labels, datasets: [{ data, backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"] }] },
-            options: { scales: { y: { beginAtZero: true } } }
-        });
-    } else {
-        barChart.data.datasets[0].data = data;
-        barChart.update();
-    }
+/* ---------- THEME ---------- */
+function applyTheme(t) {
+  document.documentElement.classList.toggle('dark', t === 'dark');
+  localStorage.setItem('theme', t);
+  themeIcon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
+  lucide.createIcons();
 }
-
-/* -------------------- RENDER -------------------- */
-function render() {
-    const items = getFilteredLog();
-    let sum = 0;
-
-    history.innerHTML = items.map(i => {
-        sum += i.eur;
-        const icon = i.cat === 'fuel' ? '⛽' : i.cat === 'hotel' ? '🏨' : '🍕';
-        const map = i.lat ? `onclick="window.open('https://maps.google.com/?q=${i.lat},${i.lon}')"` : "";
-        return `
-        <div ${map} class="glass p-4 rounded-2xl flex items-center gap-4 cursor-pointer">
-            <div class="text-2xl">${icon}</div>
-            <div class="flex-1">
-                <div class="flex justify-between">
-                    <span class="font-bold text-sm">${i.name}</span>
-                    <span class="text-cyan-400 font-mono font-bold">${i.eur.toFixed(2)}€</span>
-                </div>
-                <div class="flex justify-between text-[9px] text-slate-500 mt-1 font-bold">
-                    <span>${i.city}</span>
-                    <span>${i.date} | ${i.time}</span>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
-
-    total.innerText = sum.toFixed(2).replace('.', ',') + " €";
-    updateCharts();
-    lucide.createIcons();
-}
-
-/* -------------------- SPEECH -------------------- */
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (SR) {
-    const rec = new SR();
-    rec.lang = 'ru-RU';
-
-    micBtn.onclick = () => rec.start();
-    rec.onstart = () => micBtn.classList.add('recording');
-    rec.onend = () => micBtn.classList.remove('recording');
-
-    rec.onresult = async e => {
-        const text = e.results[0][0].transcript.toLowerCase();
-        const num = parseFloat(text.replace(',', '.').match(/(\d+[.,]?\d*)/)?.[1]);
-        if (!num) return;
-
-        let cat = 'food', name = 'Питание';
-        if (text.includes('отел') || text.includes('ноч')) { cat = 'hotel'; name = 'Жильё'; }
-        if (text.includes('заправ') || text.includes('бенз') || text.includes('дизел')) { cat = 'fuel'; name = 'Топливо'; }
-
-        const cur = detectCurrency(text);
-        const eur = await convertToEur(num, cur);
-
-        const now = new Date();
-        log.unshift({
-            name, cat, eur,
-            city: curLoc.city,
-            lat: curLoc.lat,
-            lon: curLoc.lon,
-            time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            date: now.toLocaleDateString('ru-RU', {day: 'numeric', month: 'short'})
-        });
-
-        localStorage.setItem('trip_v7', JSON.stringify(log));
-        render();
-    };
-}
-
-/* -------------------- FILTER EVENTS -------------------- */
-searchInput.oninput = e => {
-    currentFilter.search = e.target.value.toLowerCase();
-    render();
+applyTheme(localStorage.getItem('theme') || 'dark');
+themeToggle.onclick = () => {
+  const t = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+  applyTheme(t);
 };
 
-document.querySelectorAll('.catBtn').forEach(btn => {
+/* ---------- GPS ---------- */
+function initGps() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.watchPosition(async pos => {
+    curLoc.lat = pos.coords.latitude;
+    curLoc.lon = pos.coords.longitude;
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${curLoc.lat}&lon=${curLoc.lon}&accept-language=ru`);
+      const d = await r.json();
+      curLoc.city = d.address.city || d.address.town || d.address.village || "Трасса";
+      geo.textContent = "📍 " + curLoc.city.toUpperCase();
+    } catch {
+      geo.textContent = "📍 В ПУТИ";
+    }
+  }, () => geo.textContent = "📍 ОШИБКА GPS");
+}
+
+/* ---------- CURRENCY ---------- */
+async function loadRates() {
+  const now = Date.now();
+  if (fxRates && now - fxRates.timestamp < 3600000) return;
+  try {
+    const r = await fetch("https://api.exchangerate.host/latest?base=EUR&symbols=EUR,TRY,USD,GBP,PLN,CZK,HUF,RON,GEL");
+    const d = await r.json();
+    fxRates = { rates: d.rates, timestamp: now };
+    localStorage.setItem('fx_rates', JSON.stringify(fxRates));
+  } catch {}
+}
+function detectCurrency(text) {
+  if (text.includes('лир') || text.includes('турец')) return 'TRY';
+  if (text.includes('доллар')) return 'USD';
+  if (text.includes('фунт')) return 'GBP';
+  if (text.includes('злот')) return 'PLN';
+  if (text.includes('крон')) return 'CZK';
+  if (text.includes('форинт')) return 'HUF';
+  if (text.includes('лей') || text.includes('леев') || text.includes('лея')) return 'RON';
+  if (text.includes('лари')) return 'GEL';
+  return 'EUR';
+}
+async function convertToEur(amount, cur) {
+  if (cur === 'EUR') return amount;
+  await loadRates();
+  const rate = fxRates?.rates?.[cur];
+  return rate ? amount / rate : amount;
+}
+
+/* ---------- TRIPS ---------- */
+function saveTrips() {
+  localStorage.setItem('trips_v1', JSON.stringify(trips));
+  if (currentTripId) localStorage.setItem('current_trip_id', currentTripId);
+}
+function ensureDefaultTrip() {
+  if (!trips.length) {
+    const today = new Date().toISOString().slice(0,10);
+    const t = { id: crypto.randomUUID(), name: "Путь к мечте", startDate: today, log: [] };
+    trips.push(t);
+    currentTripId = t.id;
+    saveTrips();
+  }
+  if (!currentTripId || !trips.find(t => t.id === currentTripId)) {
+    currentTripId = trips[0].id;
+    saveTrips();
+  }
+}
+function getCurrentTrip() {
+  return trips.find(t => t.id === currentTripId) || null;
+}
+
+/* ---------- TRIP UI ---------- */
+function formatDateLabel(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+function renderTripDropdown() {
+  tripDropdown.innerHTML = '';
+  trips.forEach(t => {
+    const sum = t.log.reduce((s,i)=>s+i.eur,0);
+    const btn = document.createElement('button');
+    btn.className = "w-full text-left px-3 py-2 rounded-2xl hover:bg-slate-900/40 text-xs";
+    btn.textContent = `${t.name} — ${sum.toFixed(2)}€ (${formatDateLabel(t.startDate)})`;
     btn.onclick = () => {
-        currentFilter.cat = btn.dataset.cat;
-        document.querySelectorAll('.catBtn').forEach(b =>
-            b.classList.toggle('bg-slate-800', b === btn)
-        );
-        render();
+      currentTripId = t.id;
+      saveTrips();
+      tripDropdown.classList.add('hidden');
+      renderAll();
     };
+    tripDropdown.appendChild(btn);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = "w-full text-left px-3 py-2 rounded-2xl hover:bg-slate-900/40 text-xs text-cyan-400";
+  addBtn.textContent = "+ Создать новую поездку";
+  addBtn.onclick = () => {
+    tripDropdown.classList.add('hidden');
+    openNewTripModal();
+  };
+  tripDropdown.appendChild(addBtn);
+}
+tripSelectorBtn.onclick = () => {
+  if (tripDropdown.classList.contains('hidden')) {
+    renderTripDropdown();
+    tripDropdown.classList.remove('hidden');
+  } else {
+    tripDropdown.classList.add('hidden');
+  }
+};
+document.addEventListener('click', e => {
+  if (!tripSelectorBtn.contains(e.target) && !tripDropdown.contains(e.target)) {
+    tripDropdown.classList.add('hidden');
+  }
 });
 
-/* -------------------- INIT -------------------- */
-initGps();
-loadRates();
-render();
-
-/* -------------------- PWA -------------------- */
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
+/* ---------- NEW TRIP MODAL ---------- */
+function openNewTripModal() {
+  newTripName.value = '';
+  newTripDate.value = new Date().toISOString().slice(0,10);
+  newTripModal.classList.remove('hidden');
 }
-</script>
+function closeNewTripModal() {
+  newTripModal.classList.add('hidden');
+}
+newTripBtn.onclick = openNewTripModal;
+closeNewTrip.onclick = closeNewTripModal;
+createTripBtn.onclick = () => {
+  const name = newTripName.value.trim() || "Новая поездка";
+  const date = newTripDate.value || new Date().toISOString().slice(0,10);
+  const t = { id: crypto.randomUUID(), name, startDate: date, log: [] };
+  trips.push(t);
+  currentTripId = t.id;
+  saveTrips();
+  closeNewTripModal();
+  renderAll();
+};
 
-</body>
-</html>
+/* ---------- FILTERS ---------- */
+document.querySelectorAll('.catBtn').forEach(btn => {
+  btn.onclick = () => {
+    currentFilter.cat = btn.dataset.cat;
+    document.querySelectorAll('.catBtn').forEach(b => {
+      b.classList.toggle('bg-slate-800', b === btn);
+      b.classList.toggle('text-slate-100', b === btn);
+      b.classList.toggle('bg-slate-900', b !== btn);
+      b.classList.toggle('text-slate-400', b !== btn);
+    });
+    renderAll();
+  };
+});
+searchInput.oninput = e => {
+  currentFilter.search = e.target.value.toLowerCase();
+  renderAll();
+};
+
+/* ---------- CHARTS ---------- */
+function updateCharts(log) {
+  const sums = { fuel:0, hotel:0, food:0 };
+  log.forEach(i => sums[i.cat] += i.eur);
+  const labels = ["Топливо","Жильё","Питание"];
+  const data = [sums.fuel, sums.hotel, sums.food];
+
+  if (!pieChart) {
+    pieChart = new Chart(pieChartEl, {
+      type:'pie',
+      data:{ labels, datasets:[{ data, backgroundColor:["#ef4444","#3b82f6","#22c55e"] }] },
+      options:{ plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10 } } } }
+    });
+  } else {
+    pieChart.data.datasets[0].data = data;
+    pieChart.update();
+  }
+
+  if (!barChart) {
+    barChart = new Chart(barChartEl, {
+      type:'bar',
+      data:{ labels, datasets:[{ data, backgroundColor:["#ef4444","#3b82f6","#22c55e"] }] },
+      options:{ scales:{ y:{ beginAtZero:true } } }
+    });
+  } else {
+    barChart.data.datasets[0].data = data;
+    barChart.update();
+  }
+
+  const total = data.reduce((a,b)=>a+b,0) || 1;
+  const fp = Math.round(data[0]/total*100);
+  const hp = Math.round(data[1]/total*100);
+  const op = Math.round(data[2]/total*100);
+  fuelPercent.textContent = fp + "%";
+  hotelPercent.textContent = hp + "%";
+  foodPercent.textContent = op + "%";
+  fuelAmount.textContent = sums.fuel.toFixed(2).replace('.',',') + " €";
+  hotelAmount.textContent = sums.hotel.toFixed(2).replace('.',',') + " €";
+  foodAmount.textContent = sums.food.toFixed(2).replace('.',',') + " €";
+}
+
+/* ---------- RENDER ---------- */
+function getFilteredLog(trip) {
+  return trip.log.filter(i =>
+    (currentFilter.cat === 'all' || i.cat === currentFilter.cat) &&
+    (!currentFilter.search ||
+      i.name.toLowerCase().includes(currentFilter.search) ||
+      i.city.toLowerCase().includes(currentFilter.search))
+  );
+}
+function renderAll() {
+  const trip = getCurrentTrip();
+  if (!trip) return;
+
+  tripTitle.textContent = trip.name;
+  tripSelectorLabel.textContent = trip.name;
+
+  const items = getFilteredLog(trip);
+  let sum = 0;
+  historyEl.innerHTML = items.map(i => {
+    sum += i.eur;
+    const icon = i.cat === 'fuel' ? '⛽' : i.cat === 'hotel' ? '🏨' : '🍕';
+    const mapAttr = i.lat ? `onclick="window.open('https://maps.google.com/?q=${i.lat},${i.lon}')"` : "";
+    return `
+      <div ${mapAttr} class="glass p-4 rounded-2xl flex items-center gap-4 cursor-pointer active:scale-[0.99] transition">
+        <div class="text-2xl">${icon}</div>
+        <div class="flex-1">
+          <div class="flex justify-between">
+            <span class="font-bold text-sm">${i.name}</span>
+            <span class="text-cyan-400 font-mono font-bold">${i.eur.toFixed(2)}€</span>
+          </div>
+          <div class="flex justify-between text-[9px] text-slate-500 mt-1 font-bold">
+            <span>${i.city}</span>
+            <span>${i.date} | ${i.time}</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  historyCount.textContent = items.length ? `(${items.length})` : '';
+
+  totalAmount.textContent = sum.toFixed(2).replace('.',',') + " €";
+  updateCharts(trip.log);
+  renderTripDropdown();
+  lucide.createIcons();
+}
+
+/* ---------- SPEECH ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SR) {
+  const rec = new SR();
+  rec.lang = 'ru-RU';
+  rec.interimResults = false;
+
+  micBtn.onclick = () => rec.start();
+  rec.onstart = () => micBtn.classList.add('recording');
+  rec.onend = () => micBtn.classList.remove('recording');
+
+  rec.onresult = async e => {
+    try {
+      const trip = getCurrentTrip();
+      if (!trip) return;
+
+      const text = e.results[0][0].transcript.toLowerCase();
+      const numMatch = text.replace(',', '.').match(/(\d+[.,]?\d*)/);
+      if (!numMatch) return;
+      const rawAmount = parseFloat(numMatch[1]);
+      if (isNaN(rawAmount)) return;
+
+      let cat = 'food', name = 'Питание';
+      if (text.includes('отел') || text.includes('ноч')) { cat = 'hotel'; name = 'Жильё'; }
+      if (text.includes('заправ') || text.includes('бенз') || text.includes('дизел')) { cat = 'fuel'; name = 'Топливо'; }
+
+      const currency = detectCurrency(text);
+      const eur = await convertToEur(rawAmount, currency);
+      if (!eur || isNaN(eur)) return;
+
+      const now = new Date();
+      trip.log.unshift({
+        name,
+        cat,
+        eur,
+        city: curLoc.city || "Трасса",
+        lat: curLoc.lat,
+        lon: curLoc.lon,
+        time: now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
+        date: now.toLocaleDateString('ru-RU', {day:'numeric',month:'short'})
+      });
+
+      saveTrips();
+      renderAll();
+    } catch (err) {
+      console.error("Ошибка обработки речи:", err);
+    }
+  };
+} else {
+  micBtn.disabled = true;
+  micBtn.textContent = "Голос недоступен";
+}
+
+/* ---------- EXPORT / IMPORT ---------- */
+exportBtn.onclick = () => {
+  const data = { trips, currentTripId };
+    
