@@ -4,32 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#020617">
 
-    <title>Trip Tracker PWA</title>
+    <title>Trip Tracker</title>
 
+    <!-- Tailwind config -->
     <script>
-        // Tailwind config: тёмная тема по классу .dark
-        tailwind = {
-            config: {
-                darkMode: 'class'
-            }
-        };
+        tailwind = { config: { darkMode: 'class' } };
     </script>
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+    <!-- Icons + Charts -->
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body { background: #020617; color: #f8fafc; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(148, 163, 184, 0.25); backdrop-filter: blur(12px); }
-        .recording { animation: pulse 1.5s infinite; background: #ef4444 !important; color: #fff !important; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        @media screen and (display-mode: standalone) {
-            body { padding-top: env(safe-area-inset-top); }
+        body {
+            background: #020617;
+            color: #f8fafc;
+            font-family: system-ui, sans-serif;
+            overflow-x: hidden;
+        }
+        .glass {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            backdrop-filter: blur(12px);
         }
         html:not(.dark) body {
             background: #e5e7eb;
@@ -39,361 +39,287 @@
             background: rgba(255, 255, 255, 0.85);
             border-color: rgba(148, 163, 184, 0.4);
         }
+        .recording {
+            animation: pulse 1.5s infinite;
+            background: #ef4444 !important;
+            color: #fff !important;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
     </style>
 </head>
+
 <body class="p-4">
-    <div class="max-w-md mx-auto space-y-4 relative">
+<div class="max-w-md mx-auto space-y-4 relative">
 
-        <!-- Переключатель темы -->
-        <button id="themeToggle" class="absolute -top-1 right-0 p-3 glass rounded-full flex items-center justify-center active:scale-95 transition">
-            <i id="themeIcon" data-lucide="sun"></i>
-        </button>
+    <!-- Theme toggle -->
+    <button id="themeToggle"
+            class="absolute -top-1 right-0 p-3 glass rounded-full active:scale-95 transition">
+        <i id="themeIcon" data-lucide="sun"></i>
+    </button>
 
-        <!-- Итоговая сумма + гео -->
-        <div class="glass rounded-[32px] p-6 text-center shadow-2xl mt-6">
-            <div id="total" class="text-5xl font-black mb-1">0,00 €</div>
-            <div id="geo" class="text-[10px] text-cyan-400 font-bold tracking-widest uppercase italic">📍 Ожидание GPS...</div>
-        </div>
-
-        <!-- Кнопка записи -->
-        <button id="micBtn" class="w-full h-24 bg-white text-black rounded-3xl font-black text-xl flex items-center justify-center gap-3 active:scale-95 transition-all dark:bg-slate-100 dark:text-slate-900">
-            <i data-lucide="mic"></i> ЗАПИСАТЬ ГОЛОСОМ
-        </button>
-
-        <!-- Фильтры и поиск -->
-        <div class="glass rounded-3xl p-4 space-y-3">
-            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Фильтры и поиск</h3>
-            <div class="flex gap-2">
-                <input id="searchInput" type="text" placeholder="Поиск по названию (например, отель, заправка)..."
-                       class="flex-1 rounded-2xl px-3 py-2 text-sm bg-slate-900/40 border border-slate-700/60 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-slate-900/40 dark:text-slate-100">
-            </div>
-            <div class="flex gap-2 text-xs">
-                <button data-cat="all" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-800 text-slate-100 font-bold active:scale-95 transition border border-slate-700">Все</button>
-                <button data-cat="fuel" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold active:scale-95 transition border border-slate-800">Топливо</button>
-                <button data-cat="hotel" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold active:scale-95 transition border border-slate-800">Жильё</button>
-                <button data-cat="food" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold active:scale-95 transition border border-slate-800">Питание</button>
-            </div>
-        </div>
-
-        <!-- Диаграммы -->
-        <div class="space-y-3">
-            <h3 class="text-[10px] font-bold text-slate-500 uppercase px-2 tracking-widest">Аналитика расходов</h3>
-            <div class="glass p-4 rounded-3xl">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Круговая диаграмма</span>
-                    <span class="text-[10px] text-slate-500">По категориям</span>
-                </div>
-                <canvas id="pieChart" height="180"></canvas>
-            </div>
-            <div class="glass p-4 rounded-3xl">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Столбчатая диаграмма</span>
-                    <span class="text-[10px] text-slate-500">Суммы по категориям</span>
-                </div>
-                <canvas id="barChart" height="180"></canvas>
-            </div>
-        </div>
-
-        <!-- Журнал -->
-        <div class="space-y-3">
-            <h3 class="text-[10px] font-bold text-slate-500 uppercase px-2 tracking-widest">Детальный журнал</h3>
-            <div id="history" class="space-y-3 pb-10"></div>
+    <!-- Total + GPS -->
+    <div class="glass rounded-[32px] p-6 text-center shadow-2xl mt-6">
+        <div id="total" class="text-5xl font-black mb-1">0,00 €</div>
+        <div id="geo" class="text-[10px] text-cyan-400 font-bold tracking-widest uppercase italic">
+            📍 Ожидание GPS...
         </div>
     </div>
 
+    <!-- Mic -->
+    <button id="micBtn"
+            class="w-full h-24 bg-white text-black rounded-3xl font-black text-xl flex items-center justify-center gap-3 active:scale-95 transition-all dark:bg-slate-100 dark:text-slate-900">
+        <i data-lucide="mic"></i> ЗАПИСАТЬ ГОЛОСОМ
+    </button>
+
+    <!-- Filters -->
+    <div class="glass rounded-3xl p-4 space-y-3">
+        <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Фильтры и поиск</h3>
+
+        <input id="searchInput" type="text"
+               placeholder="Поиск по названию или городу..."
+               class="w-full rounded-2xl px-3 py-2 text-sm bg-slate-900/40 border border-slate-700/60 focus:ring-2 focus:ring-cyan-500 dark:bg-slate-900/40">
+
+        <div class="flex gap-2 text-xs">
+            <button data-cat="all" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-800 text-slate-100 font-bold">Все</button>
+            <button data-cat="fuel" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold">Топливо</button>
+            <button data-cat="hotel" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold">Жильё</button>
+            <button data-cat="food" class="catBtn flex-1 rounded-2xl px-3 py-2 bg-slate-900 text-slate-400 font-bold">Питание</button>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="space-y-3">
+        <h3 class="text-[10px] font-bold text-slate-500 uppercase px-2 tracking-widest">Аналитика расходов</h3>
+
+        <div class="glass p-4 rounded-3xl">
+            <canvas id="pieChart" height="180"></canvas>
+        </div>
+
+        <div class="glass p-4 rounded-3xl">
+            <canvas id="barChart" height="180"></canvas>
+        </div>
+    </div>
+
+    <!-- History -->
+    <div class="space-y-3">
+        <h3 class="text-[10px] font-bold text-slate-500 uppercase px-2 tracking-widest">Детальный журнал</h3>
+        <div id="history" class="space-y-3 pb-10"></div>
+    </div>
+
+</div>
+
 <script>
-    // ------------------ ДАННЫЕ ---------------- JSON.parse(localStorage.getItem('trip_v7')) || [];
-    let curLoc = { city: "Трасса", lat: null, lon: null };
+/* -------------------- DATA -------------------- */
+let log = JSON.parse(localStorage.getItem('trip_v7')) || [];
+let curLoc = { city: "Трасса", lat: null, lon: null };
 
-    let currentFilter = {
-        cat: 'all',
-        search: ''
-    };
+let currentFilter = { cat: 'all', search: '' };
 
-    // ------------------ GPS ------------------
-    function initGps() {
-        if (!navigator.geolocation) return;
-        navigator.geolocation.watchPosition(async (p) => {
-            curLoc.lat = p.coords.latitude;
-            curLoc.lon = p.coords.longitude;
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${curLoc.lat}&lon=${curLoc.lon}&accept-language=ru`);
-                const d = await res.json();
-                curLoc.city = d.address.city || d.address.town || d.address.village || "Трасса";
-                document.getElementById('geo').innerText = "📍 " + curLoc.city.toUpperCase();
-            } catch (e) {
-                document.getElementById('geo').innerText = "📍 В ПУТИ";
-            }
-        }, (err) => {
-            console.error(err);
-            document.getElementById('geo').innerText = "📍 ОШИБКА GPS";
-        }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
-    }
+/* -------------------- GPS -------------------- */
+function initGps() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.watchPosition(async p => {
+        curLoc.lat = p.coords.latitude;
+        curLoc.lon = p.coords.longitude;
 
-    // ------------------ ТЕМЫ ------------------
-    function applyTheme(t) {
-        document.documentElement.classList.toggle('dark', t === 'dark');
-        localStorage.setItem('theme', t);
-        const icon = document.getElementById('themeIcon');
-        icon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
-        lucide.createIcons();
-    }
-
-    let theme = localStorage.getItem('theme') || 'dark';
-    applyTheme(theme);
-
-    document.getElementById('themeToggle').onclick = () => {
-        theme = theme === 'dark' ? 'light' : 'dark';
-        applyTheme(theme);
-    };
-
-    // ------------------ ВАЛЮТЫ ------------------
-    let fxRates = JSON.parse(localStorage.getItem('fx_rates') || 'null');
-
-    async function loadRates() {
-        const now = Date.now();
-        if (fxRates && fxRates.timestamp && (now - fxRates.timestamp < 60 * 60 * 1000)) {
-            return;
-        }
         try {
-            const res = await fetch('https://api.exchangerate.host/latest?base=EUR&symbols=EUR,TRY,USD,GBP,PLN,CZK,HUF,RON,GEL');
-            const data = await res.json();
-            fxRates = {
-                rates: data.rates || {},
-                timestamp: now
-            };
-            localStorage.setItem('fx_rates', JSON.stringify(fxRates));
-        } catch (e) {
-            console.error('FX error', e);
+            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${curLoc.lat}&lon=${curLoc.lon}&accept-language=ru`);
+            const d = await r.json();
+            curLoc.city = d.address.city || d.address.town || d.address.village || "Трасса";
+            geo.innerText = "📍 " + curLoc.city.toUpperCase();
+        } catch {
+            geo.innerText = "📍 В ПУТИ";
         }
-    }
+    }, () => geo.innerText = "📍 ОШИБКА GPS");
+}
 
-    function detectCurrency(text) {
-        // по умолчанию евро
-        if (text.includes('евро') || text.includes('eur') || text.includes('€')) return 'EUR';
-        if (text.includes('лир') || text.includes('лиры') || text.includes('лира') || text.includes('турец')) return 'TRY';
-        if (text.includes('доллар')) return 'USD';
-        if (text.includes('фунт')) return 'GBP';
-        if (text.includes('злот')) return 'PLN';
-        if (text.includes('крон')) return 'CZK';
-        if (text.includes('форинт')) return 'HUF';
-        if (text.includes('лей') || text.includes('леев') || text.includes('лея')) return 'RON';
-        if (text.includes('лари')) return 'GEL';
-        return 'EUR';
-    }
+/* -------------------- THEME -------------------- */
+function applyTheme(t) {
+    document.documentElement.classList.toggle('dark', t === 'dark');
+    localStorage.setItem('theme', t);
+    themeIcon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon');
+    lucide.createIcons();
+}
+applyTheme(localStorage.getItem('theme') || 'dark');
 
-    async function convertToEur(amount, currency) {
-        if (!amount || isNaN(amount)) return 0;
-        if (currency === 'EUR') return amount;
-        await loadRates();
-        if (!fxRates || !fxRates.rates || !fxRates.rates[currency]) {
-            // если нет курса — считаем как евро
-            return amount;
-        }
-        const rate = fxRates.rates[currency]; // 1 EUR = rate CURRENCY
-        return amount / rate;
-    }
+themeToggle.onclick = () => {
+    const t = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+    applyTheme(t);
+};
 
-    // ------------------ ФИЛЬТРЫ ------------------
-    function getFilteredLog() {
-        return log.filter(item => {
-            if (currentFilter.cat !== 'all' && item.cat !== currentFilter.cat) return false;
-            if (currentFilter.search) {
-                const s = currentFilter.search.toLowerCase();
-                if (!item.name.toLowerCase().includes(s) && !item.city.toLowerCase().includes(s)) return false;
-            }
-            return true;
+/* -------------------- CURRENCY -------------------- */
+let fxRates = JSON.parse(localStorage.getItem('fx_rates') || 'null');
+
+async function loadRates() {
+    const now = Date.now();
+    if (fxRates && now - fxRates.timestamp < 3600000) return;
+
+    try {
+        const r = await fetch("https://api.exchangerate.host/latest?base=EUR&symbols=EUR,TRY,USD,GBP,PLN,CZK,HUF,RON,GEL");
+        const d = await r.json();
+        fxRates = { rates: d.rates, timestamp: now };
+        localStorage.setItem('fx_rates', JSON.stringify(fxRates));
+    } catch {}
+}
+
+function detectCurrency(t) {
+    if (t.includes('лир') || t.includes('турец')) return 'TRY';
+    if (t.includes('доллар')) return 'USD';
+    if (t.includes('фунт')) return 'GBP';
+    if (t.includes('злот')) return 'PLN';
+    if (t.includes('крон')) return 'CZK';
+    if (t.includes('форинт')) return 'HUF';
+    if (t.includes('лей') || t.includes('леев') || t.includes('лея')) return 'RON';
+    if (t.includes('лари')) return 'GEL';
+    return 'EUR';
+}
+
+async function convertToEur(amount, cur) {
+    if (cur === 'EUR') return amount;
+    await loadRates();
+    const rate = fxRates?.rates?.[cur];
+    return rate ? amount / rate : amount;
+}
+
+/* -------------------- FILTERS -------------------- */
+function getFilteredLog() {
+    return log.filter(i =>
+        (currentFilter.cat === 'all' || i.cat === currentFilter.cat) &&
+        (!currentFilter.search ||
+            i.name.toLowerCase().includes(currentFilter.search) ||
+            i.city.toLowerCase().includes(currentFilter.search))
+    );
+}
+
+/* -------------------- CHARTS -------------------- */
+let pieChart, barChart;
+
+function updateCharts() {
+    const items = getFilteredLog();
+    const sums = { fuel: 0, hotel: 0, food: 0 };
+    items.forEach(i => sums[i.cat] += i.eur);
+
+    const labels = ["Топливо", "Жильё", "Питание"];
+    const data = [sums.fuel, sums.hotel, sums.food];
+
+    if (!pieChart) {
+        pieChart = new Chart(pieChartEl, {
+            type: 'pie',
+            data: { labels, datasets: [{ data, backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"] }] }
         });
-    }
-
-    // ------------------ ДИАГРАММЫ ------------------
-    let pieChart, barChart;
-
-    function updateCharts() {
-        const filtered = getFilteredLog();
-        const sums = { fuel: 0, hotel: 0, food: 0 };
-        filtered.forEach(i => {
-            if (!sums[i.cat] && sums[i.cat] !== 0) return;
-            sums[i.cat] += i.eur;
-        });
-
-        const labels = ["Топливо", "Жильё", "Питание"];
-        const data = [sums.fuel, sums.hotel, sums.food];
-
-        const pieCtx = document.getElementById('pieChart').getContext('2d');
-        const barCtx = document.getElementById('barChart').getContext('2d');
-
-        if (!pieChart) {
-            pieChart = new Chart(pieCtx, {
-                type: 'pie',
-                data: {
-                    labels,
-                    datasets: [{
-                        data,
-                        backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"]
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#9ca3af',
-                                font: { size: 11 }
-                            }
-                        }
-                    }
-                }
-            });
-        } else {
-            pieChart.data.datasets[0].data = data;
-            pieChart.update();
-        }
-
-        if (!barChart) {
-            barChart = new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: "€",
-                        data,
-                        backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"]
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            ticks: { color: '#9ca3af', font: { size: 11 } },
-                            grid: { display: false }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: '#9ca3af', font: { size: 11 } },
-                            grid: { color: 'rgba(148,163,184,0.2)' }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#9ca3af',
-                                font: { size: 11 }
-                            }
-                        }
-                    }
-                }
-            });
-        } else {
-            barChart.data.datasets[0].data = data;
-            barChart.update();
-        }
-    }
-
-    // ------------------ РЕНДЕР ------------------
-    function render() {
-        const h = document.getElementById('history');
-        const t = document.getElementById('total');
-        let sum = 0;
-
-        const items = getFilteredLog();
-
-        h.innerHTML = items.map((item) => {
-            sum += item.eur;
-            const hasCoords = item.lat != null && item.lon != null;
-            const mapUrl = `https://www.google.com/maps?q=${item.lat},${item.lon}`;
-            const icon = item.cat === 'fuel' ? '⛽' : item.cat === 'hotel' ? '🏨' : '🍕';
-            return `
-            <div ${hasCoords ? `onclick="window.open('${mapUrl}', '_blank')"` : ''} class="glass p-4 rounded-2xl flex items-center gap-4 active:bg-slate-800/70 transition-colors cursor-pointer">
-                <div class="text-2xl">${icon}</div>
-                <div class="flex-1">
-                    <div class="flex justify-between items-start">
-                        <span class="font-bold text-sm">${item.name}</span>
-                        <span class="text-cyan-400 font-mono font-bold">${item.eur.toFixed(2)}€</span>
-                    </div>
-                    <div class="flex justify-between text-[9px] text-slate-500 mt-1 font-bold">
-                        <span>${item.city}</span>
-                        <span>${item.date} | ${item.time}</span>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-
-        t.innerText = sum.toFixed(2).replace('.', ',') + " €";
-        updateCharts();
-        lucide.createIcons();
-    }
-
-    // ------------------ РЕЧЬ ------------------
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let rec = null;
-    if (SpeechRec) {
-        rec = new SpeechRec();
-        rec.lang = 'ru-RU';
-        document.getElementById('micBtn').onclick = () => rec.start();
-        rec.onstart = () => document.getElementById('micBtn').classList.add('recording');
-        rec.onend = () => document.getElementById('micBtn').classList.remove('recording');
-
-        rec.onresult = async (e) => {
-            const text = e.results[0][0].transcript.toLowerCase();
-            const numMatch = text.replace(',', '.').match(/(\d+[.,]?\d*)/);
-            if (!numMatch) return;
-            const rawAmount = parseFloat(numMatch[1]);
-            if (!rawAmount) return;
-
-            // Категория
-            let cat = 'food'; let name = "Питание";
-            if (text.includes('отель') || text.includes('ночь') || text.includes('гостиниц')) { cat = 'hotel'; name = "Жильё"; }
-            if (text.includes('заправка') || text.includes('бензин') || text.includes('дизель') || text.includes('топливо')) { cat = 'fuel'; name = "Топливо"; }
-
-            // Валюта
-            const currency = detectCurrency(text);
-            const eurAmount = await convertToEur(rawAmount, currency);
-
-            const now = new Date();
-            log.unshift({
-                name,
-                eur: eurAmount,
-                cat,
-                city: curLoc.city,
-                lat: curLoc.lat,
-                lon: curLoc.lon,
-                time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                date: now.toLocaleDateString('ru-RU', {day: 'numeric', month: 'short'})
-            });
-            localStorage.setItem('trip_v7', JSON.stringify(log));
-            render();
-        };
     } else {
-        document.getElementById('micBtn').disabled = true;
-        document.getElementById('micBtn').innerText = 'Речь не поддерживается';
+        pieChart.data.datasets[0].data = data;
+        pieChart.update();
     }
 
-    // ------------------ СЛУШАТЕЛИ ФИЛЬТРОВ ------------------
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        currentFilter.search = e.target.value.trim();
-        render();
-    });
-
-    document.querySelectorAll('.catBtn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const cat = btn.getAttribute('data-cat');
-            currentFilter.cat = cat;
-            document.querySelectorAll('.catBtn').forEach(b => {
-                if (b === btn) {
-                    b.classList.remove('bg-slate-900', 'text-slate-400');
-                    b.classList.add('bg-slate-800', 'text-slate-100');
-                } else {
-                    b.classList.add('bg-slate-900', 'text-slate-400');
-                    b.classList.remove('bg-slate-800', 'text-slate-100');
-                }
-            });
-            render();
+    if (!barChart) {
+        barChart = new Chart(barChartEl, {
+            type: 'bar',
+            data: { labels, datasets: [{ data, backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"] }] },
+            options: { scales: { y: { beginAtZero: true } } }
         });
-    });
+    } else {
+        barChart.data.datasets[0].data = data;
+        barChart.update();
+    }
+}
 
-    // ------------------ СТАРТ ------------------
-    initGps();
-    loadRates();
+/* -------------------- RENDER -------------------- */
+function render() {
+    const items = getFilteredLog();
+    let sum = 0;
+
+    history.innerHTML = items.map(i => {
+        sum += i.eur;
+        const icon = i.cat === 'fuel' ? '⛽' : i.cat === 'hotel' ? '🏨' : '🍕';
+        const map = i.lat ? `onclick="window.open('https://maps.google.com/?q=${i.lat},${i.lon}')"` : "";
+        return `
+        <div ${map} class="glass p-4 rounded-2xl flex items-center gap-4 cursor-pointer">
+            <div class="text-2xl">${icon}</div>
+            <div class="flex-1">
+                <div class="flex justify-between">
+                    <span class="font-bold text-sm">${i.name}</span>
+                    <span class="text-cyan-400 font-mono font-bold">${i.eur.toFixed(2)}€</span>
+                </div>
+                <div class="flex justify-between text-[9px] text-slate-500 mt-1 font-bold">
+                    <span>${i.city}</span>
+                    <span>${i.date} | ${i.time}</span>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    total.innerText = sum.toFixed(2).replace('.', ',') + " €";
+    updateCharts();
+    lucide.createIcons();
+}
+
+/* -------------------- SPEECH -------------------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SR) {
+    const rec = new SR();
+    rec.lang = 'ru-RU';
+
+    micBtn.onclick = () => rec.start();
+    rec.onstart = () => micBtn.classList.add('recording');
+    rec.onend = () => micBtn.classList.remove('recording');
+
+    rec.onresult = async e => {
+        const text = e.results[0][0].transcript.toLowerCase();
+        const num = parseFloat(text.replace(',', '.').match(/(\d+[.,]?\d*)/)?.[1]);
+        if (!num) return;
+
+        let cat = 'food', name = 'Питание';
+        if (text.includes('отел') || text.includes('ноч')) { cat = 'hotel'; name = 'Жильё'; }
+        if (text.includes('заправ') || text.includes('бенз') || text.includes('дизел')) { cat = 'fuel'; name = 'Топливо'; }
+
+        const cur = detectCurrency(text);
+        const eur = await convertToEur(num, cur);
+
+        const now = new Date();
+        log.unshift({
+            name, cat, eur,
+            city: curLoc.city,
+            lat: curLoc.lat,
+            lon: curLoc.lon,
+            time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            date: now.toLocaleDateString('ru-RU', {day: 'numeric', month: 'short'})
+        });
+
+        localStorage.setItem('trip_v7', JSON.stringify(log));
+        render();
+    };
+}
+
+/* -------------------- FILTER EVENTS -------------------- */
+searchInput.oninput = e => {
+    currentFilter.search = e.target.value.toLowerCase();
     render();
+};
+
+document.querySelectorAll('.catBtn').forEach(btn => {
+    btn.onclick = () => {
+        currentFilter.cat = btn.dataset.cat;
+        document.querySelectorAll('.catBtn').forEach(b =>
+            b.classList.toggle('bg-slate-800', b === btn)
+        );
+        render();
+    };
+});
+
+/* -------------------- INIT -------------------- */
+initGps();
+loadRates();
+render();
+
+/* -------------------- PWA -------------------- */
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+}
 </script>
+
 </body>
 </html>
