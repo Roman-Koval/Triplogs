@@ -1,15 +1,19 @@
 {
-  "name": "TripLog PWA",
+  "name": "TripLog — Трекер расходов",
   "short_name": "TripLog",
-  "start_url": "./index.html",
+  "description": "Голосовой трекер расходов в поездке с конвертером валют",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#07090f",
   "theme_color": "#07090f",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/854/854878.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
