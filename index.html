@@ -452,38 +452,6 @@
 </div>
 
 <script>
- // --- Автоматическое определение валюты ---
-const currencyKeywords = {
-  "грив": "UAH",
-  "грн": "UAH",
-  "доллар": "USD",
-  "бакс": "USD",
-  "usd": "USD",
-  "евро": "EUR",
-  "eur": "EUR",
-  "злот": "PLN",
-  "лир": "TRY",
-  "lira": "TRY",
-  "tl": "TRY",
-  "фунт": "GBP",
-  "стерлинг": "GBP",
-  "крон": "CZK",
-  "сек": "SEK",
-  "нок": "NOK",
-  "dkk": "DKK"
-};
-
-function detectCurrencyFromSpeech(text) {
-  text = text.toLowerCase();
-  for (const key in currencyKeywords) {
-    if (text.includes(key)) return currencyKeywords[key];
-  }
-  return null;
-}
-
-// ── VOICE ────────────────────────────────
-var rec = null;
-
 // ── ERROR BOUNDARY ────────────────────────
 window.onerror = function(msg, src, line) {
   var d = document.createElement('div');
@@ -925,20 +893,6 @@ if (!rec) {
       texts.push(e.results[0][ai].transcript.toLowerCase());
     }
     var text = texts[0];
-    // --- Авто‑распознавание суммы ---
-var amountMatch = text.match(/(\d+([.,]\d+)?)/);
-var amount = amountMatch ? parseFloat(amountMatch[0].replace(",", ".")) : 0;
-
-// --- Авто‑распознавание валюты ---
-var detectedCurrency = detectCurrencyFromSpeech(text) || curCur;
-
-// Заполняем поля формы
-$('meTitle').value = text;
-$('meAmt').value = amount;
-$('meCur').value = detectedCurrency;
-
-// Открываем окно ручного ввода
-openManual();
 
     // ── Extract number ──
     var num = extractNum(text);
