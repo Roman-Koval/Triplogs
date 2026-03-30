@@ -5,302 +5,268 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#07090f">
   <link rel="manifest" href="manifest.json">
-  <title>TripLog Pro</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <title>TripLog Ultimate</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;700;900&display=swap" rel="stylesheet">
 
   <style>
-    :root[data-theme="dark"] {
+    :root {
       --bg:#07090f; --bg2:#0f1525; --surface:rgba(15,22,40,0.88);
       --border:rgba(255,255,255,0.08); --text:#e8eef8; --muted:#5a6a8a;
-      --accent:#38bdf8; --accent2:#818cf8; --green:#34d399; --red:#f87171;
-      --card-shadow:0 8px 32px rgba(0,0,0,0.5); --sheet-bg:#0d1628;
+      --accent:#38bdf8; --green:#34d399; --red:#f87171; --sheet-bg:#0d1628;
     }
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100dvh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
-    .mono{font-family:'Space Mono',monospace}
-    .app{max-width:420px;margin:0 auto;padding:16px 14px 120px}
-    
-    .topbar{display:flex;align-items:center;gap:8px;margin-bottom:18px}
-    .logo{font-weight:900;font-size:18px;flex:1}
-    .logo span{color:var(--accent)}
-    
-    .hero{background:var(--surface);border:1px solid var(--border);backdrop-filter:blur(16px);border-radius:28px;padding:24px;margin-bottom:14px;box-shadow:var(--card-shadow);position:relative;overflow:hidden;}
-    .hero-total{font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1}
-    .hero-total .cents{font-size:28px;opacity:.6}
+    * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+    body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; padding-bottom:120px; }
+    .mono { font-family:'Space Mono',monospace; }
+    .app { max-width:420px; margin:0 auto; padding:16px; }
 
-    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 10px;text-align:center;}
-    .stat-val{font-size:14px;font-weight:700;color:var(--accent);font-family:'Space Mono',monospace}
-    
-    .mic-btn{width:100%;height:72px;border-radius:22px;background:var(--text);color:var(--bg);border:none;font-weight:900;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;transition: transform 0.1s;}
-    .mic-btn:active{transform: scale(0.96);}
-    .mic-btn.recording{background:var(--red)!important;color:#fff!important;animation:pulse 1.2s infinite}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
+    /* HEADER & TRIP SELECTOR */
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .trip-badge { background:var(--surface); border:1px solid var(--border); padding:8px 16px; border-radius:100px; display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:700; }
 
-    .search-row{display:flex;gap:8px;margin-bottom:14px}
-    .search-input{flex:1;height:44px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0 14px;outline:none;font-family: inherit;}
-    .filter-select{height:44px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0 8px;font-weight:600;font-family: inherit;}
+    /* HERO */
+    .hero { background:var(--surface); border:1px solid var(--border); border-radius:28px; padding:24px; margin-bottom:14px; box-shadow:0 8px 32px rgba(0,0,0,0.5); }
+    .hero-val { font-size:52px; font-weight:900; letter-spacing:-2px; line-height:1; }
+    .hero-val span { font-size:24px; opacity:0.6; }
 
-    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;}
-    .chart-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;letter-spacing: 1px;}
-    .bar-wrap{display:flex;gap:4px;align-items:flex-end;height:60px;padding-top: 5px;}
-    .bar-fill{background:var(--accent);width:100%;border-radius:4px;transition:height 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);}
+    /* STATS GRID */
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:12px; text-align:center; }
+    .stat-card b { display:block; color:var(--accent); font-family:'Space Mono'; font-size:14px; margin-top:5px; }
 
-    .entry{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px; animation: slideUp 0.3s ease-out;}
-    @keyframes slideUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
-    .entry-amount{font-family:'Space Mono',monospace;font-weight:700;color:var(--accent); font-size: 15px;}
+    /* MAIN BUTTONS */
+    .mic-btn { width:100%; height:72px; border-radius:22px; background:#fff; color:#000; border:none; font-weight:900; font-size:15px; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px; }
+    .mic-btn.active { background:var(--red); color:#fff; animation:pulse 1s infinite; }
+    @keyframes pulse { 50% { opacity:0.7; } }
 
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter: blur(5px); display:none;align-items:flex-end;z-index:1000;}
-    .overlay.open{display:flex}
-    .sheet{width:100%;background:var(--sheet-bg);border-radius:28px 28px 0 0;padding:30px 24px;max-height:85vh;overflow-y:auto; transform: translateY(100%); transition: transform 0.3s ease-out;}
-    .overlay.open .sheet{transform: translateY(0);}
-    .modal-btn-map{width:100%;height:56px;background:var(--accent);border:none;border-radius:18px;color:#fff;font-weight:800;margin-top:20px; font-family: inherit; font-size: 15px;}
-    .modal-btn-del{width:100%;height:40px;background:rgba(248,113,113,0.1);border:1px solid var(--red);border-radius:14px;color:var(--red);font-weight:700;margin-top:10px; font-family: inherit;}
+    /* CHARTS */
+    .charts { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+    .chart-box { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:15px; height:120px; }
+    .chart-label { font-size:9px; font-weight:800; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    .bar-cont { display:flex; align-items:flex-end; gap:4px; height:60px; }
+    .bar { background:var(--accent); flex:1; border-radius:3px; transition:height 0.4s; }
+
+    /* LIST */
+    .entry { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:14px; display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+    .entry-info { flex:1; min-width:0; }
+    .entry-info b { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .entry-amt { font-family:'Space Mono'; font-weight:700; color:var(--accent); }
+
+    /* SHEETS (MODALS) */
+    .sheet-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); display:none; align-items:flex-end; z-index:1000; }
+    .sheet { width:100%; background:var(--sheet-bg); border-radius:30px 30px 0 0; padding:24px; max-height:90vh; overflow-y:auto; transform:translateY(100%); transition:0.3s; }
+    .sheet-overlay.active { display:flex; }
+    .sheet-overlay.active .sheet { transform:translateY(0); }
+
+    /* EXPORT BUTTONS GRID */
+    .export-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; }
+    .exp-btn { background:var(--surface); border:1px solid var(--border); border-radius:15px; padding:15px; text-align:center; cursor:pointer; }
+    .exp-btn img, .exp-btn span { display:block; font-size:24px; margin-bottom:8px; }
+    .exp-btn label { font-size:11px; font-weight:700; }
+
+    .share-main { width:100%; padding:18px; border-radius:18px; background:var(--text); color:var(--bg); border:none; font-weight:900; margin-top:15px; }
   </style>
 </head>
 <body>
 
 <div class="app">
-  <div class="topbar">
-    <div class="logo">TRIP<span>.</span>LOG</div>
-    <select id="currencySelect" class="filter-select" style="font-size: 11px;">
-        <option value="EUR">EUR (€)</option>
-        <option value="TRY">TRY (₺)</option>
-        <option value="RSD">RSD (дин)</option>
-        <option value="BGN">BGN (лв)</option>
+  <div class="header">
+    <div class="trip-badge" onclick="showTripManager()">
+      <span>📂</span> <span id="currentTripName">Путь к мечте</span>
+    </div>
+    <select id="currencyMain" class="trip-badge" style="background:none; border-color:transparent">
+      <option value="EUR">EUR (€)</option>
+      <option value="TRY">TRY (₺)</option>
+      <option value="RSD">RSD (дин)</option>
     </select>
   </div>
 
   <div class="hero">
-    <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 5px;">Всего в Евро</div>
-    <div class="hero-total mono" id="heroTotal">0<span class="cents">,00 €</span></div>
-    <div id="geoLabel" style="font-size:10px; color:var(--green); margin-top:10px; display: flex; align-items: center; gap: 5px;">
-        <div style="width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green);"></div> Поиск GPS...
+    <div class="hero-val mono" id="totalEur">0<span>,00 €</span></div>
+    <div id="gpsStatus" style="font-size:10px; margin-top:10px; color:var(--accent)">📍 Поиск GPS...</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">⛽<b id="s-fuel">0€</b></div>
+    <div class="stat-card">🏨<b id="s-hotel">0€</b></div>
+    <div class="stat-card">🍕<b id="s-food">0€</b></div>
+  </div>
+
+  <button class="mic-btn" id="micBtn">🎤 ЗАПИСАТЬ ГОЛОСОМ</button>
+  
+  <div class="header" style="margin-top:20px">
+    <input type="text" id="search" placeholder="Поиск..." style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px; color:#fff; flex:1; margin-right:10px">
+    <button class="trip-badge" onclick="showExportMenu()">📤 Поделиться</button>
+  </div>
+
+  <div class="charts">
+    <div class="chart-box">
+      <div class="chart-label">Категории</div>
+      <svg id="pie" viewBox="0 0 40 40" style="width:60px; height:60px; transform:rotate(-90deg)"></svg>
     </div>
-  </div>
-
-  <div class="stats-row">
-    <div class="stat-card">⛽<div class="stat-val" id="s-fuel">0€</div></div>
-    <div class="stat-card">🏨<div class="stat-val" id="s-hotel">0€</div></div>
-    <div class="stat-card">🍕<div class="stat-val" id="s-food">0€</div></div>
-  </div>
-
-  <button class="mic-btn" id="micBtn"><span>🎤</span> ЗАПИСАТЬ ГОЛОСОМ</button>
-
-  <div class="search-row">
-    <input type="text" id="searchInput" class="search-input" placeholder="Поиск...">
-    <select id="filterCat" class="filter-select">
-      <option value="">Все</option>
-      <option value="fuel">Топливо</option>
-      <option value="hotel">Жилье</option>
-      <option value="food">Еда</option>
-      <option value="other">Прочее</option>
-    </select>
-  </div>
-
-  <div class="charts-grid">
-    <div class="chart-card">
-        <div class="chart-title">Категории</div>
-        <svg id="pieSvg" width="60" height="60" viewBox="0 0 40 40" style="transform: rotate(-90deg); margin: 0 auto; display: block;"></svg>
-    </div>
-    <div class="chart-card">
-        <div class="chart-title">Суммы (EUR)</div>
-        <div class="bar-wrap" id="barWrap"></div>
+    <div class="chart-box">
+      <div class="chart-label">Суммы (EUR)</div>
+      <div class="bar-cont" id="barCont"></div>
     </div>
   </div>
 
   <div id="history"></div>
 </div>
 
-<div class="overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-    <div class="sheet">
-        <div id="modalCatIcon" style="font-size: 40px; margin-bottom: 10px;"></div>
-        <div id="modalTitle" style="font-size:22px; font-weight:900; letter-spacing: -0.5px;"></div>
-        <div id="modalAmount" style="font-size:36px; color:var(--accent); margin:10px 0; font-family: 'Space Mono', monospace; font-weight: 700;"></div>
-        <div id="modalMeta" style="color:var(--muted); font-size:13px; line-height: 1.6; background: var(--bg); padding: 12px; border-radius: 12px; margin-top: 15px;"></div>
-        <button class="modal-btn-map" id="mapLinkBtn">ОТКРЫТЬ В GOOGLE MAPS</button>
-        <button class="modal-btn-del" id="delEntryBtn">Удалить запись</button>
-        <button onclick="closeModal()" style="width:100%; padding:20px; background:none; border:none; color:var(--muted); font-weight: 600;">Закрыть</button>
+<div class="sheet-overlay" id="exportOverlay" onclick="if(event.target===this)closeModals()">
+  <div class="sheet">
+    <div style="text-align:center; margin-bottom:20px">
+      <h2 style="font-weight:900">📥 Экспорт и обмен</h2>
+      <p style="font-size:12px; color:var(--muted)">Выберите формат данных для поездки</p>
     </div>
+    <div class="export-grid">
+      <div class="exp-btn" onclick="exportData('csv')">📊<label>Скачать CSV</label></div>
+      <div class="exp-btn" onclick="exportData('json')">💾<label>Скачать JSON</label></div>
+      <div class="exp-btn" onclick="copyText()">📋<label>Копировать текст</label></div>
+      <div class="exp-btn" onclick="alert('HTML квитанция в разработке')">🧾<label>Квитанция HTML</label></div>
+    </div>
+    <button class="share-main" onclick="navigator.share({title:'Мои расходы', url:window.location.href})">ПОДЕЛИТЬСЯ</button>
+    <button onclick="closeModals()" style="width:100%; padding:20px; background:none; border:none; color:var(--muted)">Отмена</button>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="tripOverlay" onclick="if(event.target===this)closeModals()">
+  <div class="sheet">
+    <h2 style="margin-bottom:15px">Мои поездки</h2>
+    <div id="tripList"></div>
+    <button class="share-main" style="background:var(--accent); color:#fff" onclick="createNewTrip()">+ НОВАЯ ПОЕЗДКА</button>
+    <button onclick="closeModals()" style="width:100%; padding:20px; border:none; background:none; color:var(--muted)">Закрыть</button>
+  </div>
 </div>
 
 <script>
-const CURRENCIES = {
-  'EUR': { symbol: '€', rate: 1, kw: ['евро','евр','euro'] },
-  'TRY': { symbol: '₺', rate: 0.028, kw: ['лир','лира','лиры','try'] },
-  'RSD': { symbol: 'дин', rate: 0.0085, kw: ['динар','динаров','дин','rsd'] },
-  'BGN': { symbol: 'лв', rate: 0.51, kw: ['лев','лева','левов','лв','bgn'] }
+const CURR = { 
+  'EUR': {r:1, s:'€', kw:['евро']}, 
+  'TRY': {r:0.028, s:'₺', kw:['лир']}, 
+  'RSD': {r:0.0085, s:'дин', kw:['динар']} 
 };
 
-let entries = JSON.parse(localStorage.getItem('triplog_vfinal') || '[]');
-let userCoords = null;
+let trips = JSON.parse(localStorage.getItem('trips_v3') || '[{"id":1,"name":"Путь к мечте","active":true}]');
+let entries = JSON.parse(localStorage.getItem('entries_v3') || '[]');
+let userLoc = null;
 
-// GPS Tracker
+// GPS
 navigator.geolocation.watchPosition(p => {
-    userCoords = { lat: p.coords.latitude, lng: p.coords.longitude };
-    document.getElementById('geoLabel').innerHTML = `<div style="width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green);"></div> GPS: ${userCoords.lat.toFixed(4)}, ${userCoords.lng.toFixed(4)}`;
+  userLoc = { lat: p.coords.latitude, lng: p.coords.longitude };
+  document.getElementById('gpsStatus').innerText = `📍 GPS: ${userLoc.lat.toFixed(3)}, ${userLoc.lng.toFixed(3)}`;
 }, null, {enableHighAccuracy:true});
 
-// Speech Recognition
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (SpeechRecognition) {
-    const rec = new SpeechRecognition();
-    rec.lang = 'ru-RU';
-    rec.onstart = () => document.getElementById('micBtn').classList.add('recording');
-    rec.onend = () => document.getElementById('micBtn').classList.remove('recording');
-    rec.onresult = (e) => parseVoice(e.results[0][0].transcript.toLowerCase());
-    document.getElementById('micBtn').onclick = () => rec.start();
+// Voice
+const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(Rec) {
+  const r = new Rec(); r.lang = 'ru-RU';
+  r.onstart = () => document.getElementById('micBtn').classList.add('active');
+  r.onend = () => document.getElementById('micBtn').classList.remove('active');
+  r.onresult = (e) => parse(e.results[0][0].transcript.toLowerCase());
+  document.getElementById('micBtn').onclick = () => r.start();
 }
 
-function parseVoice(text) {
-    const amount = parseFloat(text.match(/\d+/)?.[0] || 0);
-    if (!amount) return;
+function parse(txt) {
+  const amt = parseFloat(txt.match(/\d+/)?.[0] || 0);
+  if(!amt) return;
+  
+  let cat = 'other';
+  if(txt.match(/бензин|топливо/)) cat = 'fuel';
+  else if(txt.match(/отель|жилье/)) cat = 'hotel';
+  else if(txt.match(/еда|обед|ужин/)) cat = 'food';
 
-    let cat = 'other';
-    if (text.match(/бензин|топливо|газ|заправка/)) cat = 'fuel';
-    else if (text.match(/отель|жилье|ночлег|хостел/)) cat = 'hotel';
-    else if (text.match(/еда|обед|ужин|ресторан|кафе|пицца/)) cat = 'food';
+  let cCode = document.getElementById('currencyMain').value;
+  for(let k in CURR) if(CURR[k].kw.some(w => txt.includes(w))) cCode = k;
 
-    let curr = document.getElementById('currencySelect').value;
-    for (const [code, info] of Object.entries(CURRENCIES)) {
-        if (info.kw.some(k => text.includes(k))) { curr = code; break; }
-    }
-
-    const entry = {
-        id: Date.now(),
-        title: text.replace(/\d+/g, '').replace(/(евро|лир|динар|лев|бензин|отель|еда|обед|ужин|заправка)/gi, '').trim() || 'Расход',
-        amount,
-        currency: curr,
-        category: cat,
-        coords: userCoords ? {...userCoords} : null,
-        date: new Date().toISOString()
-    };
-    entries.unshift(entry);
-    save();
+  const activeTrip = trips.find(t => t.active);
+  entries.unshift({
+    id: Date.now(), tripId: activeTrip.id, title: txt.replace(/\d+/,'').trim() || 'Расход',
+    amt, curr: cCode, cat, loc: userLoc, date: new Date().toISOString()
+  });
+  save();
 }
 
 function save() {
-    localStorage.setItem('triplog_vfinal', JSON.stringify(entries));
-    render();
+  localStorage.setItem('trips_v3', JSON.stringify(trips));
+  localStorage.setItem('entries_v3', JSON.stringify(entries));
+  render();
 }
 
 function render() {
-    const list = document.getElementById('history');
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const filter = document.getElementById('filterCat').value;
+  const activeTrip = trips.find(t => t.active);
+  document.getElementById('currentTripName').innerText = activeTrip.name;
+  
+  const tripEntries = entries.filter(e => e.tripId === activeTrip.id);
+  const list = document.getElementById('history');
+  list.innerHTML = '';
+  
+  let total = 0, st = {fuel:0, hotel:0, food:0, other:0};
+  
+  tripEntries.forEach(e => {
+    const val = e.amt * CURR[e.curr].r;
+    total += val; st[e.cat] += val;
     
-    list.innerHTML = '';
-    let totalEur = 0;
-    let stats = { fuel:0, hotel:0, food:0, other:0 };
-
-    entries.forEach(e => {
-        const eurValue = e.amount * (CURRENCIES[e.currency]?.rate || 1);
-        totalEur += eurValue;
-        stats[e.category] += eurValue;
-
-        if (filter && e.category !== filter) return;
-        if (search && !e.title.toLowerCase().includes(search)) return;
-
-        const el = document.createElement('div');
-        el.className = 'entry';
-        el.onclick = () => openModal(e);
-        el.innerHTML = `
-            <div style="font-size:22px">${getIcon(e.category)}</div>
-            <div style="flex:1; min-width:0">
-                <div style="font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${e.title}</div>
-                <div style="font-size:10px; color:var(--muted)">${new Date(e.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-            </div>
-            <div class="entry-amount">${e.amount.toLocaleString()} ${CURRENCIES[e.currency].symbol}</div>
-        `;
-        list.appendChild(el);
-    });
-
-    // Hero Update
-    const parts = totalEur.toFixed(2).split('.');
-    document.getElementById('heroTotal').innerHTML = `${parts[0]}<span class="cents">,${parts[1]} €</span>`;
-    
-    // Stats Update
-    document.getElementById('s-fuel').innerText = stats.fuel.toFixed(0) + '€';
-    document.getElementById('s-hotel').innerText = stats.hotel.toFixed(0) + '€';
-    document.getElementById('s-food').innerText = stats.food.toFixed(0) + '€';
-
-    renderCharts(stats);
-}
-
-function renderCharts(stats) {
-    // Bar Chart
-    const barWrap = document.getElementById('barWrap');
-    barWrap.innerHTML = '';
-    const vals = Object.values(stats);
-    const max = Math.max(...vals, 1);
-    vals.forEach(v => {
-        const h = (v / max) * 100;
-        barWrap.innerHTML += `<div class="bar-fill" style="height:${Math.max(h, 5)}%"></div>`;
-    });
-
-    // Pie Chart (SVG)
-    const total = Object.values(stats).reduce((a,b)=>a+b, 0) || 1;
-    let currentPercent = 0;
-    const colors = ['#38bdf8', '#818cf8', '#34d399', '#5a6a8a'];
-    let paths = '';
-    Object.values(stats).forEach((v, i) => {
-        const p = (v / total) * 100;
-        if (p === 0) return;
-        const x1 = Math.cos(2 * Math.PI * currentPercent / 100) * 20 + 20;
-        const y1 = Math.sin(2 * Math.PI * currentPercent / 100) * 20 + 20;
-        currentPercent += p;
-        const x2 = Math.cos(2 * Math.PI * currentPercent / 100) * 20 + 20;
-        const y2 = Math.sin(2 * Math.PI * currentPercent / 100) * 20 + 20;
-        const largeArc = p > 50 ? 1 : 0;
-        paths += `<path d="M 20 20 L ${x1} ${y1} A 20 20 0 ${largeArc} 1 ${x2} ${y2} Z" fill="${colors[i]}"></path>`;
-    });
-    document.getElementById('pieSvg').innerHTML = paths || `<circle cx="20" cy="20" r="18" fill="rgba(255,255,255,0.05)"></circle>`;
-}
-
-function getIcon(c) { return {fuel:'⛽', hotel:'🏨', food:'🍕'}[c] || '📦'; }
-
-function openModal(e) {
-    document.getElementById('modalCatIcon').innerText = getIcon(e.category);
-    document.getElementById('modalTitle').innerText = e.title;
-    document.getElementById('modalAmount').innerText = `${e.amount.toLocaleString()} ${CURRENCIES[e.currency].symbol}`;
-    
-    const eurVal = (e.amount * CURRENCIES[e.currency].rate).toFixed(2);
-    document.getElementById('modalMeta').innerHTML = `
-        <b>Курс:</b> 1 ${e.currency} = ${CURRENCIES[e.currency].rate} EUR<br>
-        <b>В Евро:</b> ~ ${eurVal} €<br>
-        <b>Время:</b> ${new Date(e.date).toLocaleString()}
+    const div = document.createElement('div');
+    div.className = 'entry';
+    div.innerHTML = `
+      <div style="font-size:24px">${{fuel:'⛽',hotel:'🏨',food:'🍕'}[e.cat]||'📦'}</div>
+      <div class="entry-info"><b>${e.title}</b><small>${new Date(e.date).toLocaleTimeString()}</small></div>
+      <div class="entry-amt">${e.amt}${CURR[e.curr].s}</div>
     `;
-    
-    const btn = document.getElementById('mapLinkBtn');
-    if (e.coords) {
-        btn.style.display = 'block';
-        btn.onclick = () => window.open(`https://www.google.com/maps?q=${e.coords.lat},${e.coords.lng}`);
-    } else {
-        btn.style.display = 'none';
-    }
+    list.appendChild(div);
+  });
 
-    document.getElementById('delEntryBtn').onclick = () => {
-        if(confirm('Удалить эту запись?')) {
-            entries = entries.filter(item => item.id !== e.id);
-            save();
-            closeModal();
-        }
-    };
-
-    document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('totalEur').innerHTML = `${total.toFixed(2).split('.')[0]}<span>,${total.toFixed(2).split('.')[1]} €</span>`;
+  document.getElementById('s-fuel').innerText = st.fuel.toFixed(0)+'€';
+  document.getElementById('s-hotel').innerText = st.hotel.toFixed(0)+'€';
+  document.getElementById('s-food').innerText = st.food.toFixed(0)+'€';
+  
+  drawCharts(st);
 }
 
-function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function drawCharts(st) {
+  const bar = document.getElementById('barCont'); bar.innerHTML = '';
+  const max = Math.max(...Object.values(st), 1);
+  Object.values(st).forEach(v => {
+    bar.innerHTML += `<div class="bar" style="height:${(v/max)*100}%"></div>`;
+  });
+}
 
-document.getElementById('searchInput').oninput = render;
-document.getElementById('filterCat').onchange = render;
+// UI Modals
+function showExportMenu() { document.getElementById('exportOverlay').classList.add('active'); }
+function showTripManager() {
+  const list = document.getElementById('tripList');
+  list.innerHTML = trips.map(t => `
+    <div class="entry" onclick="switchTrip(${t.id})" style="border:${t.active?'1px solid var(--accent)':'none'}">
+      <div style="flex:1"><b>${t.name}</b></div>
+      ${t.active ? '✅' : ''}
+    </div>
+  `).join('');
+  document.getElementById('tripOverlay').classList.add('active');
+}
+function closeModals() { document.querySelectorAll('.sheet-overlay').forEach(o => o.classList.remove('active')); }
 
-// Init
+function switchTrip(id) {
+  trips.forEach(t => t.active = (t.id === id));
+  save(); closeModals();
+}
+
+function createNewTrip() {
+  const name = prompt('Назовите поездку:');
+  if(!name) return;
+  trips.forEach(t => t.active = false);
+  trips.push({id:Date.now(), name, active:true});
+  save(); closeModals();
+}
+
+function exportData(type) {
+  const data = JSON.stringify(entries.filter(e => e.tripId === trips.find(t=>t.active).id));
+  const blob = new Blob([data], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `trip.${type}`; a.click();
+}
+
 render();
 </script>
 </body>
