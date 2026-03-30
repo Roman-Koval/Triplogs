@@ -3,95 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#07090f">
   <meta name="apple-mobile-web-app-title" content="TripLog">
-  <link rel="manifest" href="manifest.json"> <title>TripLog Multi-Currency</title>
+  <link rel="manifest" href="manifest.json">
+  <title>TripLog Pro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
 
   <style>
-    /* Все ваши стили из предыдущего кода сохраняются */
+    /* ВОЗВРАЩАЕМ ВЕСЬ ТВОЙ ОРИГИНАЛЬНЫЙ ДИЗАЙН */
     :root[data-theme="dark"] {
       --bg:#07090f; --bg2:#0f1525; --surface:rgba(15,22,40,0.88);
       --border:rgba(255,255,255,0.08); --text:#e8eef8; --muted:#5a6a8a;
       --accent:#38bdf8; --accent2:#818cf8; --green:#34d399; --red:#f87171;
-      --amber:#fbbf24; --card-shadow:0 8px 32px rgba(0,0,0,0.5);
-      --sheet-bg:#0d1628;
+      --card-shadow:0 8px 32px rgba(0,0,0,0.5); --sheet-bg:#0d1628;
     }
-    :root[data-theme="light"] {
-      --bg:#f0f4f8; --bg2:#ffffff; --surface:rgba(255,255,255,0.92);
-      --border:rgba(0,0,0,0.08); --text:#1a2236; --muted:#8899bb;
-      --accent:#0284c7; --accent2:#6366f1; --green:#059669; --red:#dc2626;
-      --amber:#d97706; --card-shadow:0 4px 20px rgba(0,0,0,0.1);
-      --sheet-bg:#f8fafc;
-    }
-
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    body{
-      background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;
-      min-height:100dvh;transition:background .35s,color .35s;
-      padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
-    }
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100dvh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
     .mono{font-family:'Space Mono',monospace}
     .app{max-width:420px;margin:0 auto;padding:16px 14px 120px}
-
-    /* TOP BAR */
+    
     .topbar{display:flex;align-items:center;gap:8px;margin-bottom:18px}
-    .logo{font-weight:900;font-size:18px;letter-spacing:-.5px;flex:1}
+    .logo{font-weight:900;font-size:18px;flex:1}
     .logo span{color:var(--accent)}
-    .trip-chip{
-      display:flex;align-items:center;gap:5px;
-      background:var(--surface);border:1px solid var(--border);
-      border-radius:100px;padding:6px 12px;cursor:pointer;
-      font-size:11px;font-weight:700;color:var(--muted);
-      transition:border-color .2s;max-width:120px;
-    }
-    .icon-btn{
-      width:40px;height:40px;border-radius:50%;
-      border:1px solid var(--border);background:var(--surface);
-      color:var(--text);display:flex;align-items:center;justify-content:center;
-    }
-
-    /* HERO */
-    .hero{
-      background:var(--surface);border:1px solid var(--border);
-      backdrop-filter:blur(16px);border-radius:28px;padding:24px;
-      margin-bottom:14px;box-shadow:var(--card-shadow);
-      position:relative;overflow:hidden;
-    }
-    .hero-label{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+    
+    .hero{background:var(--surface);border:1px solid var(--border);backdrop-filter:blur(16px);border-radius:28px;padding:24px;margin-bottom:14px;box-shadow:var(--card-shadow);position:relative;overflow:hidden;}
     .hero-total{font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1}
     .hero-total .cents{font-size:28px;opacity:.6}
 
-    /* MIC & CONTROLS */
-    .mic-btn{
-      width:100%;height:72px;border-radius:22px;background:var(--text);color:var(--bg);
-      border:none;cursor:pointer;font-weight:900;font-size:15px;
-      display:flex;align-items:center;justify-content:center;gap:10px;
-      margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.25);
-    }
-    .mic-btn.recording { background: var(--red) !important; color: white !important; }
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 10px;text-align:center;}
+    .stat-val{font-size:14px;font-weight:700;color:var(--accent);font-family:'Space Mono',monospace}
+    
+    .mic-btn{width:100%;height:72px;border-radius:22px;background:var(--text);color:var(--bg);border:none;font-weight:900;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;}
+    .mic-btn.recording{background:var(--red)!important;color:#fff!important;animation:pulse 1.2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
 
     .search-row{display:flex;gap:8px;margin-bottom:14px}
-    .filter-select{
-        height:44px;border-radius:14px;background:var(--surface);border:1px solid var(--border);
-        color:var(--text);padding:0 8px;font-size:12px;font-weight:600;
-    }
+    .search-input{flex:1;height:44px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0 14px;outline:none}
+    .filter-select{height:44px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0 8px;font-weight:600}
 
-    /* HISTORY */
-    .entry{
-        background:var(--surface);border:1px solid var(--border);border-radius:18px;
-        padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px;
-    }
-    .entry-amount{font-family:'Space Mono',monospace;font-weight:700;font-size:15px;color:var(--accent)}
-    
-    /* TOAST */
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--bg);font-weight:700;padding:12px 22px;border-radius:100px;transition:transform .4s;z-index:9999}
-    .toast.show{transform:translateX(-50%) translateY(0)}
+    /* Charts */
+    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;}
+    .chart-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+    .bar-wrap{display:flex;gap:4px;align-items:flex-end;height:60px}
+    .bar-fill{background:var(--accent);width:100%;border-radius:4px;transition:height 0.5s}
+
+    .entry{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .entry-amount{font-family:'Space Mono',monospace;font-weight:700;color:var(--accent)}
+
+    /* Modal / Overlay */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:flex-end;z-index:1000}
+    .overlay.open{display:flex}
+    .sheet{width:100%;background:var(--sheet-bg);border-radius:28px 28px 0 0;padding:24px;max-height:80vh;overflow-y:auto}
+    .modal-btn-map{width:100%;height:50px;background:var(--accent);border:none;border-radius:15px;color:#fff;font-weight:800;margin-top:15px}
   </style>
 </head>
 <body>
@@ -99,44 +68,192 @@
 <div class="app">
   <div class="topbar">
     <div class="logo">TRIP<span>.</span>LOG</div>
-    <div class="trip-chip" onclick="alert('Меню поездок')">
-      <span>🗂</span><span id="tripName">Поездка 1</span>
-    </div>
+    <select id="currencySelect" class="filter-select" style="font-size: 10px;">
+        <option value="EUR">EUR (€)</option>
+        <option value="TRY">TRY (₺)</option>
+        <option value="RSD">RSD (дин)</option>
+        <option value="BGN">BGN (лв)</option>
+    </select>
   </div>
 
   <div class="hero">
-    <div class="hero-label">Общие расходы (в Евро)</div>
     <div class="hero-total mono" id="heroTotal">0<span class="cents">,00 €</span></div>
-    <div id="geoLabel" style="font-size: 10px; margin-top: 10px; color: var(--green);">● GPS активен</div>
+    <div id="geoLabel" style="font-size:10px; color:var(--accent); margin-top:8px">📍 Ожидание GPS...</div>
   </div>
 
-  <button class="mic-btn" id="micBtn">
-    <span>🎤</span><span id="micLabel">ЗАПИСАТЬ ГОЛОСОМ</span>
-  </button>
+  <div class="stats-row">
+    <div class="stat-card">⛽<div class="stat-val" id="s-fuel">0€</div></div>
+    <div class="stat-card">🏨<div class="stat-val" id="s-hotel">0€</div></div>
+    <div class="stat-card">🍕<div class="stat-val" id="s-food">0€</div></div>
+  </div>
+
+  <button class="mic-btn" id="micBtn">🎤 ЗАПИСАТЬ ГОЛОСОМ</button>
 
   <div class="search-row">
-    <select class="filter-select" id="currencySelect" title="Текущая валюта">
-        <option value="EUR">EUR (€)</option>
-        <option value="TRY">TRY (₺) Турция</option>
-        <option value="RSD">RSD (дин) Сербия</option>
-        <option value="BGN">BGN (лв) Болгария</option>
+    <input type="text" id="searchInput" class="search-input" placeholder="Поиск...">
+    <select id="filterCat" class="filter-select">
+      <option value="">Все</option>
+      <option value="fuel">Топливо</option>
+      <option value="hotel">Жилье</option>
+      <option value="food">Еда</option>
     </select>
-    <select class="filter-select" id="filterCat" style="flex:1">
-      <option value="">Все категории</option>
-      <option value="fuel">⛽ Топливо</option>
-      <option value="hotel">🏨 Жильё</option>
-      <option value="food">🍕 Питание</option>
-      <option value="other">📦 Прочее</option>
-    </select>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-title">Категории</div>
+        <svg id="pieSvg" width="60" height="60" viewBox="0 0 40 40" style="transform: rotate(-90deg);"></svg>
+    </div>
+    <div class="chart-card">
+        <div class="chart-title">Динамика</div>
+        <div class="bar-wrap" id="barWrap"></div>
+    </div>
   </div>
 
   <div id="history"></div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="overlay" id="modalOverlay">
+    <div class="sheet">
+        <div id="modalTitle" style="font-size:20px; font-weight:900"></div>
+        <div id="modalAmount" style="font-size:32px; color:var(--accent); margin:10px 0"></div>
+        <div id="modalMeta" style="color:var(--muted); font-size:12px"></div>
+        <button class="modal-btn-map" id="mapLinkBtn">ОТКРЫТЬ НА КАРТЕ</button>
+        <button onclick="closeModal()" style="width:100%; padding:15px; background:none; border:none; color:var(--text)">Закрыть</button>
+    </div>
+</div>
 
 <script>
-/** * КОНФИГУРАЦИЯ ВАЛЮТ 
+const CURRENCIES = {
+  'EUR': { symbol: '€', rate: 1, kw: ['евро','евр'] },
+  'TRY': { symbol: '₺', rate: 0.028, kw: ['лир','лира','лиры'] },
+  'RSD': { symbol: 'дин', rate: 0.0085, kw: ['динар','дин'] },
+  'BGN': { symbol: 'лв', rate: 0.51, kw: ['лев','лева','лв'] }
+};
+
+let entries = JSON.parse(localStorage.getItem('trip_v2') || '[]');
+let userCoords = null;
+
+// GPS
+navigator.geolocation.watchPosition(p => {
+    userCoords = { lat: p.coords.latitude, lng: p.coords.longitude };
+    document.getElementById('geoLabel').innerText = `📍 GPS: ${userCoords.lat.toFixed(4)}, ${userCoords.lng.toFixed(4)}`;
+}, null, {enableHighAccuracy:true});
+
+// Voice
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+    const rec = new SpeechRecognition();
+    rec.lang = 'ru-RU';
+    document.getElementById('micBtn').onclick = () => { rec.start(); document.getElementById('micBtn').classList.add('recording'); };
+    rec.onend = () => document.getElementById('micBtn').classList.remove('recording');
+    rec.onresult = (e) => parseText(e.results[0][0].transcript.toLowerCase());
+}
+
+function parseText(text) {
+    const amount = parseFloat(text.match(/\d+/)?.[0] || 0);
+    if (!amount) return;
+
+    let cat = 'other';
+    if (text.includes('бензин') || text.includes('топливо')) cat = 'fuel';
+    if (text.includes('отель') || text.includes('жилье')) cat = 'hotel';
+    if (text.includes('еда') || text.includes('обед') || text.includes('ужин')) cat = 'food';
+
+    let curr = document.getElementById('currencySelect').value;
+    for (const [code, info] of Object.entries(CURRENCIES)) {
+        if (info.kw.some(k => text.includes(k))) { curr = code; break; }
+    }
+
+    const entry = {
+        id: Date.now(),
+        title: text.replace(/\d+/g, '').trim(),
+        amount,
+        currency: curr,
+        category: cat,
+        coords: userCoords,
+        date: new Date().toISOString()
+    };
+    entries.unshift(entry);
+    update();
+}
+
+function update() {
+    localStorage.setItem('trip_v2', JSON.stringify(entries));
+    render();
+}
+
+function render() {
+    const list = document.getElementById('history');
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const filter = document.getElementById('filterCat').value;
+    
+    list.innerHTML = '';
+    let totalEur = 0;
+    let stats = { fuel:0, hotel:0, food:0, other:0 };
+
+    entries.forEach(e => {
+        const eurValue = e.amount * CURRENCIES[e.currency].rate;
+        totalEur += eurValue;
+        stats[e.category] += eurValue;
+
+        if (filter && e.category !== filter) return;
+        if (search && !e.title.includes(search)) return;
+
+        const el = document.createElement('div');
+        el.className = 'entry';
+        el.onclick = () => openModal(e);
+        el.innerHTML = `
+            <div style="font-size:20px">${getIcon(e.category)}</div>
+            <div style="flex:1"><b>${e.title}</b><br><small>${new Date(e.date).toLocaleTimeString()}</small></div>
+            <div class="entry-amount">${e.amount} ${CURRENCIES[e.currency].symbol}</div>
+        `;
+        list.appendChild(el);
+    });
+
+    document.getElementById('heroTotal').innerHTML = `${totalEur.toFixed(2).split('.')[0]}<span class="cents">,${totalEur.toFixed(2).split('.')[1]} €</span>`;
+    document.getElementById('s-fuel').innerText = stats.fuel.toFixed(0) + '€';
+    document.getElementById('s-hotel').innerText = stats.hotel.toFixed(0) + '€';
+    document.getElementById('s-food').innerText = stats.food.toFixed(0) + '€';
+
+    renderCharts(stats);
+}
+
+function renderCharts(stats) {
+    const barWrap = document.getElementById('barWrap');
+    barWrap.innerHTML = '';
+    const max = Math.max(...Object.values(stats), 1);
+    Object.values(stats).forEach(v => {
+        const h = (v / max) * 100;
+        barWrap.innerHTML += `<div class="bar-fill" style="height:${h}%"></div>`;
+    });
+}
+
+function getIcon(c) { return {fuel:'⛽', hotel:'🏨', food:'🍕'}[c] || '📦'; }
+
+function openModal(e) {
+    document.getElementById('modalTitle').innerText = e.title;
+    document.getElementById('modalAmount').innerText = `${e.amount} ${CURRENCIES[e.currency].symbol}`;
+    document.getElementById('modalMeta').innerText = `Курс: ${CURRENCIES[e.currency].rate} EUR | Дата: ${new Date(e.date).toLocaleString()}`;
+    
+    const btn = document.getElementById('mapLinkBtn');
+    if (e.coords) {
+        btn.style.display = 'block';
+        btn.onclick = () => window.open(`https://www.google.com/maps?q=${e.coords.lat},${e.coords.lng}`);
+    } else {
+        btn.style.display = 'none';
+    }
+    document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+document.getElementById('searchInput').oninput = render;
+document.getElementById('filterCat').onchange = render;
+
+render();
+</script>
+</body>
+</html>
  * Обновите курсы перед поездкой
  */
 const CURRENCIES = {
