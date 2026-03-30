@@ -2,6 +2,7 @@ const CACHE_NAME = 'trip-tracker-v1';
 const ASSETS = [
   './',
   './index.html',
+  './app.js',
   './manifest.json'
 ];
 
